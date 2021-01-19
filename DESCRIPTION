@@ -7,9 +7,15 @@ Authors@R:
            role = c("aut", "cre"),
            email = "Sarah.Gaichas@noaa.gov",
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+Description: Atlantis diagnostics functions in this package are used to determine whether the model 
+    is meeting defined performance and review criteria, including persistence of all functional groups,
+    biomass stability for the last ~20 years of an unfished, unperturbed 80-100 year run, species groups 
+    totaling ~80% of system biomass qualitatively matching known biomass trends, patterns of temporal 
+    variability are captured, productivity for groups totaling ~80% of system biomass qualitatively 
+    matching FMSY or life history expectations, natural mortality decreasing with age for most groups,
+    age and length structure qualitatively matching expectations for majority of groups, and predicted
+    diet qualitatively matching empirical diet comp for majority of groups.
+License:  `use_gpl3_license()` 
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
