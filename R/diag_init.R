@@ -78,8 +78,8 @@ diag_init <- function(config_file){
                               file_fgs = functional.groups.file)
   #Get just the names of active functional groups
   fgs.names <- fgs %>%
-    dplyr::filter(IsTurnedOn == 1) %>%
-    dplyr::select(Name) %>%
+    dplyr::filter(.data$IsTurnedOn == 1) %>%
+    dplyr::select(.data$Name) %>%
     .$Name
 
   # should return all model areas

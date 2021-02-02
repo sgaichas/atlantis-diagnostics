@@ -11,10 +11,13 @@
 #'phytoplankton drivers.
 #'
 #'@param atBtxt A dataframe of total biomass of all groups over time, read in from
-#'Atlantis [scenario]BioInd.txt output using \code{atlantisom::load_bioind}.
+#'Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.
 #'@param fgs.names A vector of species names
 #'@param plot A logical value specifying if the function should generate plots or
 #'not. The default is \code{TRUE}.
+#'
+#'@importFrom magrittr %>%
+#'@importFrom rlang .data
 #'
 #'@return Returns a dataframe of crashed species with columns "Failed" of species
 #'names and "nYrs0B" with number of years having 0 biomass. Also plots all species
@@ -36,18 +39,18 @@ diag_persist <- function(atBtxt, fgs.names, plot=TRUE){
   # assumes biomass never goes negative in atlantis
 
   crash <- atBtxt %>%
-    filter(species %in% fgs.names) %>%
-    mutate(yr = ceiling(time/365)) %>%
-    filter(yr > 0) %>%
-    group_by(species, yr) %>%
-    summarise(meanB = mean(atoutput)) %>%
-    filter(meanB == 0)
+    dplyr::filter(.data$species %in% fgs.names) %>%
+    dplyr::mutate(yr = ceiling(.data$time/365)) %>%
+    dplyr::filter(.data$yr > 0) %>%
+    dplyr::group_by(.data$species, .data$yr) %>%
+    dplyr::summarise(meanB = mean(.data$atoutput)) %>%
+    dplyr::filter(.data$meanB == 0)
 
   # flag any groups with any mean annual biomass below a threshold
 
   crashed <- crash %>%
-    group_by(species) %>%
-    count()
+    dplyr::group_by(.data$species) %>%
+    dplyr::count()
 
   names(crashed) <- c("Failed", "nYrs0B")
 
@@ -59,13 +62,13 @@ diag_persist <- function(atBtxt, fgs.names, plot=TRUE){
                       breaks = c(-Inf, 0, Inf),
                       labels = c("crashed", ">0 B"))
 
-    plotB <-ggplot() +
-      geom_line(data=atBtxt%>%filter(species %in% fgs.names),
-                aes(x=time/365,y=atoutput, color=col),
-                alpha = 10/10) +
+    plotB <-ggplot2::ggplot() +
+      ggplot2::geom_line(data=atBtxt%>%dplyr::filter(.data$species %in% fgs.names),
+                         ggplot2::aes(x=.data$time/365,y=.data$atoutput, color=.data$col),
+                         alpha = 10/10) +
       ggthemes::theme_tufte() +
-      theme(legend.position = "top") +
-      labs(colour=g.name)
+      ggplot2::theme(legend.position = "top") +
+      ggplot2::labs(colour=g.name)
 
     print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 1, scales="free"))
     print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 2, scales="free"))

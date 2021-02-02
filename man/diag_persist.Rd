@@ -8,7 +8,7 @@ diag_persist(atBtxt, fgs.names, plot = TRUE)
 }
 \arguments{
 \item{atBtxt}{A dataframe of total biomass of all groups over time, read in from
-Atlantis \link{scenario}BioInd.txt output using \code{atlantisom::load_bioind}.}
+Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 
 \item{fgs.names}{A vector of species names}
 
