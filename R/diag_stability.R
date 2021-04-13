@@ -78,7 +78,7 @@ diag_stability <- function(biomass, speciesNames, nYrs = 20, sigTest = 0.05, plo
   # then extract slope and significance from model fit
   stability <- stable %>%
     dplyr::mutate(model = purrr::map(data,fitlm)) %>%
-    dplyr::transmute(species,beta = purrr::map_dbl(model,coefs),pValue=purrr::map_dbl(model,pVals)) %>%
+    dplyr::transmute(species,slope = purrr::map_dbl(model,coefs),pValue=purrr::map_dbl(model,pVals)) %>%
     dplyr::mutate(pass = pValue > sigTest) %>%
     dplyr::ungroup()
 
