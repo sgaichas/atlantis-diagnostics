@@ -58,7 +58,7 @@
 #'
 #'}
 
-diag_persist <- function(biomass, speciesNames=NULL, nYrs = NULL, floor = 0, tol = 1E-6, plot=F){
+diag_persistence <- function(biomass, speciesNames=NULL, nYrs = NULL, floor = 0, tol = 1E-6, plot=F){
 
   # need in annual units? Or fail when any output timestep below threshold?
   # make safe for migratory species, assume that over the course of the year mean B > 0.
@@ -114,32 +114,32 @@ diag_persist <- function(biomass, speciesNames=NULL, nYrs = NULL, floor = 0, tol
 
   # visualize; hardcoded pages for ~89 group NEUS model
 
-  if(plot){
-
-    atBtxt$col <- cut(biomass$atoutput,
-                      breaks = c(-Inf, 0, Inf),
-                      labels = c("crashed", ">0 B"))
-
-    plotB <- ggplot2::ggplot() +
-      ggplot2::geom_line(data=biomass %>% dplyr::filter(species %in% fgs.names),
-                         ggplot2::aes(x=time/365,y=atoutput, color=col),
-                         alpha = 10/10) +
-      ggthemes::theme_tufte() +
-      ggplot2::theme(legend.position = "top")
-     print(plotB)
-    #+
-    #  ggplot2::labs(colour=g.name)
-
-     # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 1, scales="free"))
-     # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 2, scales="free"))
-     # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 3, scales="free"))
-     # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 4, scales="free"))
-     # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 5, scales="free"))
-     # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 6, scales="free"))
-     # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 7, scales="free"))
-     # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 8, scales="free"))
-  }
-
-  return(as.data.frame(crashed))
+  # if(plot){
+  #
+  #   atBtxt$col <- cut(biomass$atoutput,
+  #                     breaks = c(-Inf, 0, Inf),
+  #                     labels = c("crashed", ">0 B"))
+  #
+  #   plotB <- ggplot2::ggplot() +
+  #     ggplot2::geom_line(data=biomass %>% dplyr::filter(species %in% fgs.names),
+  #                        ggplot2::aes(x=time/365,y=atoutput, color=col),
+  #                        alpha = 10/10) +
+  #     ggthemes::theme_tufte() +
+  #     ggplot2::theme(legend.position = "top")
+  #    print(plotB)
+  #   #+
+  #   #  ggplot2::labs(colour=g.name)
+  #
+  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 1, scales="free"))
+  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 2, scales="free"))
+  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 3, scales="free"))
+  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 4, scales="free"))
+  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 5, scales="free"))
+  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 6, scales="free"))
+  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 7, scales="free"))
+  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 8, scales="free"))
+  # }
+  #
+  # return(as.data.frame(crashed))
 
 }
