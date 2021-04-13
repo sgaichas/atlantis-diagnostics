@@ -2,6 +2,6 @@
 
 export(diag_init)
 export(diag_persistence)
-export(diag_stable)
+export(diag_stability)
 importFrom(magrittr,"%>%")
 importFrom(rlang,.data)
