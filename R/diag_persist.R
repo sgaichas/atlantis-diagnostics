@@ -27,9 +27,10 @@
 #'
 #'
 #'@return Returns a data frame of species which do not meet defined persistence criteria.
-
+#'
 #'\item{species}{The common name of the species/functional group}
 #'\item{Code}{Atlantis Code for species/functional group}
+#'\item{initialBiomass}{Starting value of Biomass for species/functional group}
 #'\item{minimumBiomass}{The smallest value of biomass observed in the run}
 #'\item{tminimumBiomass}{The time step in which \code{minimumBiomass} occurred }
 #'\item{t1}{The first time step persistence was not met}
@@ -41,8 +42,20 @@
 #'
 #'@examples
 #'\dontrun{
-#'# Usage
-#'diag_persist(testdiag$atBtxt, testdiag$fgs.names)
+#'# Declare paths to files required
+#' biol.file <- "neus_outputBiomIndx.txt"
+#' file_fgs <- "neus_groups.csv"
+#' # use atlantisom to read them in
+#' fgs <- atlantisom::load_fgs(inDir,file_fgs)
+#' biomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
+#'
+#' # find all species that do not have biomass > 0 for any time during the run.
+#' diag_persist(biomass)
+#'
+#' # only evaluate herring. Require stability over the last 10 years of the run and all values should
+#' exceed 10% of initial biomass
+#' diag_persist(biomass, speciesNames="Herring", nYrs = 10, floor = 0.1)
+#'
 #'}
 
 diag_persist <- function(biomass, speciesNames=NULL, nYrs = NULL, floor = 0, tol = 1E-6, plot=F){
@@ -72,7 +85,8 @@ diag_persist <- function(biomass, speciesNames=NULL, nYrs = NULL, floor = 0, tol
     dplyr::filter(species %in% speciesNames) %>%
     dplyr::select(species, time, atoutput) %>%
     dplyr::group_by(species) %>%
-    dplyr::mutate(proportionInitBio = atoutput/dplyr::first(atoutput)) %>%
+    dplyr::mutate(initialBiomass = dplyr::first(atoutput)) %>%
+    dplyr::mutate(proportionInitBio = atoutput/initialBiomass) %>%
     dplyr::filter(proportionInitBio <= (floor + tol)) %>%
     dplyr::ungroup()
 
@@ -80,7 +94,8 @@ diag_persist <- function(biomass, speciesNames=NULL, nYrs = NULL, floor = 0, tol
     return(persistence=NULL)
   }
 
-  # max breach, time of max breach, num breaches
+  # num times threshold exceeded, when largest exceedance occurs and value of biomass,
+  # range of exceedances
   persistence <- status %>%
     dplyr::group_by(species) %>%
     dplyr::mutate(minimumBiomass = min(atoutput)) %>%
@@ -88,7 +103,7 @@ diag_persist <- function(biomass, speciesNames=NULL, nYrs = NULL, floor = 0, tol
     dplyr::mutate(tminimumBiomass = dplyr::case_when(atoutput == min(atoutput) ~ time)) %>%
     dplyr::mutate(t1 = min(time), tn = max(time)) %>%
     dplyr::filter(!is.na(tminimumBiomass)) %>%
-    dplyr::select(species,proportionInitBio, minimumBiomass, tminimumBiomass, t1, tn, nts) %>%
+    dplyr::select(species,initialBiomass,proportionInitBio, minimumBiomass, tminimumBiomass, t1, tn, nts) %>%
     dplyr::filter(tminimumBiomass == min(tminimumBiomass))
 
 
