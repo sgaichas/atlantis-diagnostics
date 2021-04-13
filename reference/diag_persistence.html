@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • atlantisdiagnostics</title>
+<title>Test for all functional group persistence — diag_persistence • atlantisdiagnostics</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,10 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Test for all functional group persistence — diag_persistence" />
+<meta property="og:description" content="Inspects each time point. If at any point in time a species falls below a predefined floor it
+is flagged. The floors are specifies as a proportion of initial biomass. The last n years of the run are
+used in the test" />
 
 
 
@@ -58,7 +61,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -100,54 +103,87 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Test for all functional group persistence</h1>
+    
+    <div class="hidden name"><code>diag_persistence.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Inspects each time point. If at any point in time a species falls below a predefined floor it
+is flagged. The floors are specifies as a proportion of initial biomass. The last n years of the run are
+used in the test</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>diag_persistence</span><span class='op'>(</span>
+  <span class='va'>biomass</span>,
+  speciesNames <span class='op'>=</span> <span class='cn'>NULL</span>,
+  nYrs <span class='op'>=</span> <span class='cn'>NULL</span>,
+  floor <span class='op'>=</span> <span class='fl'>0</span>,
+  tol <span class='op'>=</span> <span class='fl'>1e-06</span>,
+  plot <span class='op'>=</span> <span class='cn'>F</span>
+<span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="diag_init.html">diag_init()</a></code> </p>
-        </td>
-        <td><p>Initialize Atlantis diagnostics</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="diag_persistence.html">diag_persistence()</a></code> </p>
-        </td>
-        <td><p>Test for all functional group persistence</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="diag_stability.html">diag_stability()</a></code> </p>
-        </td>
-        <td><p>Test for model stability</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>biomass</th>
+      <td><p>A data frame. Total biomass of all groups over time, read in from
+Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></td>
+    </tr>
+    <tr>
+      <th>speciesNames</th>
+      <td><p>Character vector. A vector of species names in which to test for persistence.
+(Default = NULL, uses all species found in  <code>biomass</code>)</p></td>
+    </tr>
+    <tr>
+      <th>nYrs</th>
+      <td><p>Numeric scalar. Number of years from the end of the time series that persistence must occur.
+(Default = NULL, persistence must occur throughout entire time series)</p></td>
+    </tr>
+    <tr>
+      <th>floor</th>
+      <td><p>Numeric scalar. Proportion of initial biomass for which for which all species
+are measured against. (Default = 0, all species need to be non zero). Range should be 0-1</p></td>
+    </tr>
+    <tr>
+      <th>tol</th>
+      <td><p>Numeric scalar. Tolerance level to add to biomass floor (Default = 1E-6)</p></td>
+    </tr>
+    <tr>
+      <th>plot</th>
+      <td><p>A logical value specifying if the function should generate plots or
+not. (Default = F).</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>Returns a data frame of species which do not meet defined persistence criteria.</p>
+<dt>species</dt><dd><p>The common name of the species/functional group</p></dd>
+<dt>Code</dt><dd><p>Atlantis Code for species/functional group</p></dd>
+<dt>initialBiomass</dt><dd><p>Starting value of Biomass for species/functional group</p></dd>
+<dt>minimumBiomass</dt><dd><p>The smallest value of biomass observed in the run</p></dd>
+<dt>tminimumBiomass</dt><dd><p>The time step in which <code>minimumBiomass</code> occurred</p></dd>
+<dt>t1</dt><dd><p>The first time step persistence was not met</p></dd>
+<dt>tn</dt><dd><p>The last time step persistence was not met</p></dd>
+<dt>nts</dt><dd><p>The total number of time steps that persistence was not met</p></dd>
+
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    
+
+<p>Need To Edit. Maybe not applicable. This should be run on an unfished, unperturbed run. Fishing or
+perturbations may legitimately drive groups extinct. However, for our
+historical period, we don’t expect anything to go extinct that is in the
+system now, so this test includes historical fishing, physics, and
+phytoplankton drivers.</p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"></pre>
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
