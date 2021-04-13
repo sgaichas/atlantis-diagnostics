@@ -104,7 +104,8 @@ diag_persistence <- function(biomass, speciesNames=NULL, nYrs = NULL, floor = 0,
     dplyr::mutate(t1 = min(time), tn = max(time)) %>%
     dplyr::filter(!is.na(tminimumBiomass)) %>%
     dplyr::select(species,initialBiomass,proportionInitBio, minimumBiomass, tminimumBiomass, t1, tn, nts) %>%
-    dplyr::filter(tminimumBiomass == min(tminimumBiomass))
+    dplyr::filter(tminimumBiomass == min(tminimumBiomass)) %>%
+    dplyr::ungroup()
 
 
 
