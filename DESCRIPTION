@@ -28,7 +28,9 @@ Imports:
     ggplot2,
     magrittr,
     ggthemes,
-    ggforce
+    ggforce,
+    purrr,
+    tidyr
 Remotes:
     r4atlantis/atlantisom,
     NOAA-EDAB/atlantisdrive

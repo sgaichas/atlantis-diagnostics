@@ -25,7 +25,7 @@
 #'names and "nYrs0B" with number of years having 0 biomass. Also plots all species
 #'trajectories with orange (positive) or purple (negative) trend lines for unstable
 #'groups over the last 20 years unless plot=FALSE.
-#'@export
+#'@noRd
 #'
 #'@author Sarah Gaichas
 #'
