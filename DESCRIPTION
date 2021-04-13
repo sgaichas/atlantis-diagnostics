@@ -28,8 +28,9 @@ Imports:
     ggplot2,
     magrittr,
     ggthemes,
-    ggforce,
-    atlantisom,
-    atlantisdrive
+    ggforce
+Remotes:
+    r4atlantis/atlantisom,
+    NOAA-EDAB/atlantisdrive
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
