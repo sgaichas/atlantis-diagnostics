@@ -1,89 +1,112 @@
 #'Test for model stability
 #'
-#'@description \code{diag_stable} determines whether the model reaches steady state
-#'for the last ~20 years of an unperturbed, unfished ~100 year run.
+#'\code{diag_stability} determines whether the model reaches a steady state
+#'over the last n years of a run. Stability is loosely defined as a species/groups biomass reaching a
+#'stable level (measured as having no trend in a defined time range).
 #'
-#'@details This test evaluates the last 20 years of the input run for a significant
-#'slope using the \code{geom_gls} function from the package \code{ecodata} at
-#'\link{https://github.com/NOAA-EDAB/ecodata}. The function `diag_stable` also
-#'checks for persistence and flags groups that have gone to 0 biomass--they don't
-#'count as stable. It takes the same inputs as `diag_persist` with the addition of
-#'the \code{runpar} object, and defaults to plotting, which can be turned off with
-#'`plot=FALSE` in the function call.
 #'
-#'@param atBtxt A dataframe of total biomass of all groups over time, read in from
+#'@param biomass A data frame. Total biomass of all groups over time, read in from
 #'Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.
-#'@param fgs.names A vector of species names
-#'@param runpar A list of Atlantis run parameters read in from the .xml file using
-#'\code{atlantisom::load_runprm}
-#'@param plot A logical value specifying if the function should generate plots or
-#'not. The default is \code{TRUE}.
+#'@param speciesNames Character vector. A vector of species names in which to test for stability.
+#'(Default = NULL, uses all species found in  \code{biomass})
+#'@param nYrs Numeric scalar. Number of years from the end of the time series that stability must occur.
+#' (Default = 20 years)
+#'@param sigTest Numeric Scalar. alpha level to use to test for slope significance (Default = 0.05)
+#'@param plot Logical. Specifying whether the function should generate plots or not. (Default is F).
 #'
 #'@importFrom magrittr %>%
 #'
-#'@return Returns a dataframe of crashed species with columns "Failed" of species
-#'names and "nYrs0B" with number of years having 0 biomass. Also plots all species
-#'trajectories with orange (positive) or purple (negative) trend lines for unstable
-#'groups over the last 20 years unless plot=FALSE.
+#'@return Returns a data frame of all species and how they measure up against the stability criterion
+#'\item{species}{The common name of the species/functional group}
+#'\item{slope}{Double. The value of the slope parameter (time) }
+#'\item{pValue}{Double. The p-value associated with the slope parameter (time)}
+#'\item{pass}{Logical. Does the species/group pass the test for stability}
+#'
+#'
+#'@section Details:
+#'
+#'Formally the following model is fit to the last n years of the run:
+#'
+#' \deqn{biomass_t = \mu + \beta.t + \epsilon_t  where \epsilon_t ~ IID N(0,\sigma^2)}
+#'
+#' where null hypothesis,  \deqn{H0:\beta=0}
+#'
 #'@export
 #'
-#'@author Sarah Gaichas
 #'
 #'@examples
 #'\dontrun{
-#'# Usage
-#'diag_stable(testdiag$atBtxt, testdiag$fgs.names, testdiag$runpar)
+#'# Declare paths to files required
+#' biol.file <- "neus_outputBiomIndx.txt"
+#' file_fgs <- "neus_groups.csv"
+#' # use atlantisom to read them in
+#' fgs <- atlantisom::load_fgs(inDir,file_fgs)
+#' biomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
+#'
+#' # Perform stability test on all species/groups using the last 20 years of the run
+#' diag_stability(biomass)
+#'
+#' # Only perform test on herring and white hake.
+#' # Require stability over the last 10 years of the run and and use alpha = 0.1 as tests significance level
+#' diag_stability(biomass, speciesNames=c("Herring","White_Hake"), nYrs = 10, sigTest = 0.1)
 #'}
 
-#'
-diag_stable <- function(atBtxt, fgs.names, runpar, plot=TRUE){
+diag_stability <- function(biomass, speciesNames, nYrs = 20, sigTest = 0.05, plot=F){
 
-  # look for non-significant slope over last 20 years? 30 years would be better
-  nlast <- 20
+  # find final time step value
+  maxRuntime <- max(biomass$time)
 
-  startlast <- floor(runpar$nyears)-nlast
+  # use default options
+  if (is.null(speciesNames)) { # select all species
+    speciesNames <- unique(biomass$species)
+  }
+  if (is.null(nYrs)) { # use all time series
+    filterTime <- 0
+  } else { # last n years
+    filterTime <- maxRuntime- (365*nYrs)
+  }
 
-  #warning, was getting different behavior with this code on my linux machine
+  # select species, timframe, group, nest
+  stable <- biomass %>%
+    dplyr::filter(time >= filterTime) %>%
+    dplyr::filter(species %in% speciesNames) %>%
+    dplyr::select(species,time,atoutput) %>%
+    dplyr::group_by(species) %>%
+    tidyr::nest()
 
-  stable <- atBtxt%>%filter(species %in% fgs.names) %>%
-    #filter(time %in% seq(startlast*365, floor(runpar$nyears)*365, by=365)) %>%
-    filter(time %in% seq(startlast*365, floor(runpar$nyears)*365, by=runpar$outputstep)) %>%
-    group_by(species) %>%
-    ggplot(aes(x=time/365, y=atoutput)) +
-    ggthemes::theme_tufte() +
-    geom_line(data=atBtxt%>%filter(species %in% fgs.names),
-              aes(x=time/365, y=atoutput),
-              alpha = 5/10) +
-    geom_gls(warn = FALSE)
+  # fit linear model (biomass = alpha + time.beta) to each species over the time frame specified
+  # then extract slope and significance from model fit
+  stability <- stable %>%
+    dplyr::mutate(model = purrr::map(data,fitlm)) %>%
+    dplyr::transmute(species,beta = purrr::map_dbl(model,coefs),pValue=purrr::map_dbl(model,pVals)) %>%
+    dplyr::mutate(pass = pValue > sigTest) %>%
+    dplyr::ungroup()
 
 
-  print(stable + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 1, scales="free"))
-  print(stable + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 2, scales="free"))
-  print(stable + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 3, scales="free"))
-  print(stable + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 4, scales="free"))
-  print(stable + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 5, scales="free"))
-  print(stable + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 6, scales="free"))
-  print(stable + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 7, scales="free"))
-  print(stable + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 8, scales="free"))
+  return(stability)
 
-  # what I need is to extract the output of geom_gls that is NULL (no significant trend)
-
-  # this may work eventually but blows up R right now, fix later
-  # # get results from ecotrend package
-  # stabletest <- atBtxt %>%
-  #   filter(species %in% fgs.names) %>%
-  #   #mutate(yr = ceiling(time/365)) %>%
-  #   filter(time %in% seq(startlast*365, floor(runpar$nyears)*365, by=365)) %>%
-  #   group_by(species) %>%
-  #   dplyr::do(ecotrend::glsMs(data = ., formula = time ~ atoutput))
-  #
-  #ecotrend::glsMs(data = ., formula = yr ~ biomass)
-
-  #ecotrend::glsMs(yr ~ biomass, stabletest)
-
-  #test this run for persistence too
-
-  # flag any groups with any mean annual biomass below a threshold
 
 
 }
+
+
+## Helper functions
+
+coefs <- function(model){
+  coefficients(model)[["time"]]
+}
+
+pVals <- function(model){
+  summary(model)$coefficients[,4][["time"]]
+}
+
+fitlm <- function(df){
+  lm(atoutput ~ time, data=df)
+}
+
+
+
+
+
+
+
