@@ -4,41 +4,74 @@
 \alias{diag_persist}
 \title{Test for all functional group persistence}
 \usage{
-diag_persist(atBtxt, fgs.names, plot = TRUE)
+diag_persist(
+  biomass,
+  speciesNames = NULL,
+  nYrs = NULL,
+  floor = 0,
+  tol = 1e-06,
+  plot = F
+)
 }
 \arguments{
-\item{atBtxt}{A dataframe of total biomass of all groups over time, read in from
+\item{biomass}{A data frame. Total biomass of all groups over time, read in from
 Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 
-\item{fgs.names}{A vector of species names}
+\item{speciesNames}{Character vector. A vector of species names in which to test for persistence.
+(Default = NULL, uses all species found in  \code{biomass})}
+
+\item{nYrs}{Numeric scalar. Number of years from the end of the time series that persistence must occur.
+(Default = NULL, persistence must occur throughout entire time series)}
+
+\item{floor}{Numeric scalar. Proportion of initial biomass for which for which all species
+are measured against. (Default = 0, all species need to be non zero). Range should be 0-1}
+
+\item{tol}{Numeric scalar. Tolerance level to add to biomass floor (Default = 1E-6)}
 
 \item{plot}{A logical value specifying if the function should generate plots or
-not. The default is \code{TRUE}.}
+not. (Default = F).}
 }
 \value{
-Returns a dataframe of crashed species with columns "Failed" of species
-names and "nYrs0B" with number of years having 0 biomass. Also plots all species
-trajectories with red lines for crashed years unless plot=FALSE.
+Returns a data frame of species which do not meet defined persistence criteria.
+
+\item{species}{The common name of the species/functional group}
+\item{Code}{Atlantis Code for species/functional group}
+\item{initialBiomass}{Starting value of Biomass for species/functional group}
+\item{minimumBiomass}{The smallest value of biomass observed in the run}
+\item{tminimumBiomass}{The time step in which \code{minimumBiomass} occurred }
+\item{t1}{The first time step persistence was not met}
+\item{tn}{The last time step persistence was not met}
+\item{nts}{The total number of time steps that persistence was not met}
 }
 \description{
-\code{diag_persist} Averages over a year to see if mean B is 0,
-assuming that initial (Time = 0) biomass does not count. Output is a list of
-species that have crashed and an optional set of plots where 0 biomass is red.
+Inspects each time point. If at any point in time a species falls below a predefined floor it
+is flagged. The floors are specifies as a proportion of initial biomass. The last n years of the run are
+used in the test
 }
-\details{
-This should be run on an unfished, unperturbed run. Fishing or
+\section{Details}{
+
+Need To Edit. Maybe not applicable. This should be run on an unfished, unperturbed run. Fishing or
 perturbations may legitimately drive groups extinct. However, for our
 historical period, we don’t expect anything to go extinct that is in the
 system now, so this test includes historical fishing, physics, and
 phytoplankton drivers.
 }
+
 \examples{
 \dontrun{
-# Usage
-diag_persist(testdiag$atBtxt, testdiag$fgs.names)
-}
+# Declare paths to files required
+biol.file <- "neus_outputBiomIndx.txt"
+file_fgs <- "neus_groups.csv"
+# use atlantisom to read them in
+fgs <- atlantisom::load_fgs(inDir,file_fgs)
+biomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
+
+# find all species that do not have biomass > 0 for any time during the run.
+diag_persist(biomass)
+
+# only evaluate herring. Require stability over the last 10 years of the run and all values should
+exceed 10\% of initial biomass
+diag_persist(biomass, speciesNames="Herring", nYrs = 10, floor = 0.1)
 
 }
-\author{
-Sarah Gaichas
 }

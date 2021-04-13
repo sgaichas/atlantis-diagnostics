@@ -2,11 +2,16 @@ Package: atlantisdiagnostics
 Title: Implements Atlantis Model Performance Diagnostics Outlined in Kaplan and Marshall 2016
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Sarah",
+    c(person(given = "Sarah",
            family = "Gaichas",
            role = c("aut", "cre"),
            email = "Sarah.Gaichas@noaa.gov",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           comment = c(ORCID = "YOUR-ORCID-ID")),
+    person(given = "Andy",
+           family = "Beet",
+           role = c("aut"),
+           email = "andrew.beet@noaa.gov",
+           comment = c(ORCID = "0000-0001-8270-7090")))
 Description: Atlantis diagnostics functions in this package are used to determine whether the model 
     is meeting defined performance and review criteria, including persistence of all functional groups,
     biomass stability for the last ~20 years of an unfished, unperturbed 80-100 year run, species groups 
@@ -19,13 +24,13 @@ License: CC0
 Encoding: UTF-8
 LazyData: true
 Imports:
-    rlang,
     dplyr,
     ggplot2,
     magrittr,
     ggthemes,
-    ggforce,
-    atlantisom,
-    atlantisdrive
+    ggforce
+Remotes:
+    r4atlantis/atlantisom,
+    NOAA-EDAB/atlantisdrive
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
