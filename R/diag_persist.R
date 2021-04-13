@@ -17,7 +17,6 @@
 #'not. The default is \code{TRUE}.
 #'
 #'@importFrom magrittr %>%
-#'@importFrom rlang .data
 #'
 #'@return Returns a dataframe of crashed species with columns "Failed" of species
 #'names and "nYrs0B" with number of years having 0 biomass. Also plots all species
