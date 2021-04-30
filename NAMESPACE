@@ -2,5 +2,6 @@
 
 export(diag_init)
 export(diag_persistence)
+export(diag_reasonability)
 export(diag_stability)
 importFrom(magrittr,"%>%")

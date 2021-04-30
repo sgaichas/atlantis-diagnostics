@@ -11,7 +11,22 @@ Authors@R:
            family = "Beet",
            role = c("aut"),
            email = "andrew.beet@noaa.gov",
-           comment = c(ORCID = "0000-0001-8270-7090")))
+           comment = c(ORCID = "0000-0001-8270-7090")),
+    person(given = "Joeseph",
+           family = "Caracappa",
+           role = c("aut"),
+           email = "joseph.caracappa@noaa.gov",
+           comment = c(ORCID = "YOUR-ORCID-ID")),
+    person(given = "Robert",
+           family = "Gamble",
+           role = c("aut"),
+           email = "Robert.Gamble@noaa.gov",
+           comment = c(ORCID = "YOUR-ORCID-ID")),
+    person(given = "Scott",
+           family = "Large",
+           role = c("aut"),
+           email = "Scott.Large.gov",
+           comment = c(ORCID = "YOUR-ORCID-ID")))
 Description: Atlantis diagnostics functions in this package are used to determine whether the model 
     is meeting defined performance and review criteria, including persistence of all functional groups,
     biomass stability for the last ~20 years of an unfished, unperturbed 80-100 year run, species groups 
