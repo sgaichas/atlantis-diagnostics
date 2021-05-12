@@ -4,7 +4,7 @@
 #' is flagged. The floors are specifies as a proportion of initial biomass. The last n years of the run are
 #' used in the test
 #'
-#'@param biomass A data frame. Total biomass of all groups over time, read in from
+#'@param modelBiomass A data frame. Total biomass of all groups over time, read in from
 #'Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.
 #'@param speciesNames Character vector. A vector of species names in which to test for persistence.
 #'(Default = NULL, uses all species found in  \code{biomass})
@@ -29,7 +29,7 @@
 #'@return Returns a data frame of species which do not meet defined persistence criteria.
 #'
 #'\item{species}{The common name of the species/functional group}
-#'\item{Code}{Atlantis Code for species/functional group}
+#'\item{code}{Atlantis Code for species/functional group}
 #'\item{initialBiomass}{Starting value of Biomass for species/functional group}
 #'\item{minimumBiomass}{The smallest value of biomass observed in the run}
 #'\item{tminimumBiomass}{The time step in which \code{minimumBiomass} occurred }
@@ -58,18 +58,18 @@
 #'
 #'}
 
-diag_persistence <- function(biomass, speciesNames=NULL, nYrs = NULL, floor = 0, tol = 1E-6, plot=F){
+diag_persistence <- function(modelBiomass, speciesNames=NULL, nYrs = NULL, floor = 0, tol = 1E-6, plot=F){
 
   # need in annual units? Or fail when any output timestep below threshold?
   # make safe for migratory species, assume that over the course of the year mean B > 0.
   # assumes biomass never goes negative in atlantis
 
   # find final time step value
-  maxRuntime <- max(biomass$time)
+  maxRuntime <- max(modelBiomass$time)
 
   # use default options
   if (is.null(speciesNames)) { # select all species
-    speciesNames <- unique(biomass$species)
+    speciesNames <- unique(modelBiomass$species)
   }
   if (is.null(nYrs)) { # use all time series
     filterTime <- 0
@@ -80,7 +80,7 @@ diag_persistence <- function(biomass, speciesNames=NULL, nYrs = NULL, floor = 0,
 
   # For each species calculate which time steps biomass is below persistence threshold
   # we look at biomass < % initial Biomass
-  status <- biomass %>%
+  status <- modelBiomass %>%
     dplyr::filter(time >= filterTime) %>%
     dplyr::filter(species %in% speciesNames) %>%
     dplyr::select(species, time, atoutput) %>%
@@ -110,37 +110,5 @@ diag_persistence <- function(biomass, speciesNames=NULL, nYrs = NULL, floor = 0,
 
 
   return(persistence)
-
-
-
-  # visualize; hardcoded pages for ~89 group NEUS model
-
-  # if(plot){
-  #
-  #   atBtxt$col <- cut(biomass$atoutput,
-  #                     breaks = c(-Inf, 0, Inf),
-  #                     labels = c("crashed", ">0 B"))
-  #
-  #   plotB <- ggplot2::ggplot() +
-  #     ggplot2::geom_line(data=biomass %>% dplyr::filter(species %in% fgs.names),
-  #                        ggplot2::aes(x=time/365,y=atoutput, color=col),
-  #                        alpha = 10/10) +
-  #     ggthemes::theme_tufte() +
-  #     ggplot2::theme(legend.position = "top")
-  #    print(plotB)
-  #   #+
-  #   #  ggplot2::labs(colour=g.name)
-  #
-  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 1, scales="free"))
-  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 2, scales="free"))
-  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 3, scales="free"))
-  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 4, scales="free"))
-  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 5, scales="free"))
-  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 6, scales="free"))
-  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 7, scales="free"))
-  #    # print(plotB + ggforce::facet_wrap_paginate(~species, ncol=4, nrow = 3, page = 8, scales="free"))
-  # }
-  #
-  # return(as.data.frame(crashed))
 
 }

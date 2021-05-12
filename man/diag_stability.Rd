@@ -4,10 +4,10 @@
 \alias{diag_stability}
 \title{Test for model stability}
 \usage{
-diag_stability(biomass, speciesNames, nYrs = 20, sigTest = 0.05, plot = F)
+diag_stability(modelBiomass, speciesNames, nYrs = 20, sigTest = 0.05, plot = F)
 }
 \arguments{
-\item{biomass}{A data frame. Total biomass of all groups over time, read in from
+\item{modelBiomass}{A data frame. Total biomass of all groups over time, read in from
 Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 
 \item{speciesNames}{Character vector. A vector of species names in which to test for stability.
