@@ -160,7 +160,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesNames=NULL, 
         dplyr::filter(code == acode) %>%
         dplyr::filter(year > filterTime) %>%
         dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
-        dplyr::mutate(reasonable = (modelBiomass < tot.biomass*surveyBounds[2]) & (modelBiomass > tot.biomass*surveyBounds[1])) %>%
+        dplyr::mutate(reasonable = (modelBiomass < max(tot.biomass)*surveyBounds[2]) & (modelBiomass > min(tot.biomass)*surveyBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(tot.biomass,modelBiomass)$mef) %>%
         dplyr::mutate(nObs = calc_mef(tot.biomass,modelBiomass)$n)
 
