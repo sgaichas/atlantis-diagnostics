@@ -22,7 +22,6 @@
 #'  \item{YOY, dataframe young of year output}
 #'  \item{biol, list of biological parameters output of \code{atlantisom::load_biolprm}}
 #' }
-#'@export
 #'
 #'@author Sarah Gaichas
 #'
@@ -54,7 +53,8 @@
 #'testdiag <- diag_init("DiagnosticConfig.R")
 #'}
 #'
-#'
+#'@noRd
+
 diag_init <- function(config_file){
 
   source(config_file)

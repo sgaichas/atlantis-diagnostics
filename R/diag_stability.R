@@ -5,7 +5,7 @@
 #'stable level (measured as having no trend in a defined time range).
 #'
 #'
-#'@param biomass A data frame. Total biomass of all groups over time, read in from
+#'@param modelBiomass A data frame. Total biomass of all groups over time, read in from
 #'Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.
 #'@param speciesNames Character vector. A vector of species names in which to test for stability.
 #'(Default = NULL, uses all species found in  \code{biomass})
@@ -51,14 +51,14 @@
 #' diag_stability(biomass, speciesNames=c("Herring","White_Hake"), nYrs = 10, sigTest = 0.1)
 #'}
 
-diag_stability <- function(biomass, speciesNames, nYrs = 20, sigTest = 0.05, plot=F){
+diag_stability <- function(modelBiomass, speciesNames, nYrs = 20, sigTest = 0.05, plot=F){
 
   # find final time step value
-  maxRuntime <- max(biomass$time)
+  maxRuntime <- max(modelBiomass$time)
 
   # use default options
   if (is.null(speciesNames)) { # select all species
-    speciesNames <- unique(biomass$species)
+    speciesNames <- unique(modelBiomass$species)
   }
   if (is.null(nYrs)) { # use all time series
     filterTime <- 0
@@ -67,7 +67,7 @@ diag_stability <- function(biomass, speciesNames, nYrs = 20, sigTest = 0.05, plo
   }
 
   # select species, timframe, group, nest
-  stable <- biomass %>%
+  stable <- modelBiomass %>%
     dplyr::filter(time >= filterTime) %>%
     dplyr::filter(species %in% speciesNames) %>%
     dplyr::select(species,time,atoutput) %>%
@@ -82,6 +82,9 @@ diag_stability <- function(biomass, speciesNames, nYrs = 20, sigTest = 0.05, plo
     dplyr::mutate(pass = pValue > sigTest) %>%
     dplyr::ungroup()
 
+
+  stability <- stability %>%
+    dplyr::arrange(pass,pValue)
 
   return(stability)
 

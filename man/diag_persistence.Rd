@@ -5,7 +5,7 @@
 \title{Test for all functional group persistence}
 \usage{
 diag_persistence(
-  biomass,
+  modelBiomass,
   speciesNames = NULL,
   nYrs = NULL,
   floor = 0,
@@ -14,7 +14,7 @@ diag_persistence(
 )
 }
 \arguments{
-\item{biomass}{A data frame. Total biomass of all groups over time, read in from
+\item{modelBiomass}{A data frame. Total biomass of all groups over time, read in from
 Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 
 \item{speciesNames}{Character vector. A vector of species names in which to test for persistence.
@@ -35,7 +35,7 @@ not. (Default = F).}
 Returns a data frame of species which do not meet defined persistence criteria.
 
 \item{species}{The common name of the species/functional group}
-\item{Code}{Atlantis Code for species/functional group}
+\item{code}{Atlantis Code for species/functional group}
 \item{initialBiomass}{Starting value of Biomass for species/functional group}
 \item{minimumBiomass}{The smallest value of biomass observed in the run}
 \item{tminimumBiomass}{The time step in which \code{minimumBiomass} occurred }
