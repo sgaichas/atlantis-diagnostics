@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Test for all functional group persistence — diag_persistence • atlantisdiagnostics</title>
+<title>Test for all functional groups to persist within reasonable bounds — diag_reasonability • atlantisdiagnostics</title>
 
 
 <!-- jquery -->
@@ -39,10 +39,9 @@
 
 
 
-<meta property="og:title" content="Test for all functional group persistence — diag_persistence" />
-<meta property="og:description" content="Inspects each time point. If at any point in time a species falls below a predefined floor it
-is flagged. The floors are specifies as a proportion of initial biomass. The last n years of the run are
-used in the test" />
+<meta property="og:title" content="Test for all functional groups to persist within reasonable bounds — diag_reasonability" />
+<meta property="og:description" content="Inspects each time point. If at any point in time a species falls below or rises above predefined
+bounds it is flagged. The term &quot;reasonable&quot; is based on survey data when available." />
 
 
 
@@ -105,23 +104,24 @@ used in the test" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Test for all functional group persistence</h1>
+    <h1>Test for all functional groups to persist within reasonable bounds</h1>
     
-    <div class="hidden name"><code>diag_persistence.Rd</code></div>
+    <div class="hidden name"><code>diag_reasonability.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Inspects each time point. If at any point in time a species falls below a predefined floor it
-is flagged. The floors are specifies as a proportion of initial biomass. The last n years of the run are
-used in the test</p>
+    <p>Inspects each time point. If at any point in time a species falls below or rises above predefined
+bounds it is flagged. The term "reasonable" is based on survey data when available.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>diag_persistence</span><span class='op'>(</span>
+    <pre class="usage"><span class='fu'>diag_reasonability</span><span class='op'>(</span>
   <span class='va'>modelBiomass</span>,
+  initialYr <span class='op'>=</span> <span class='fl'>1964</span>,
   speciesNames <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>realBiomass</span>,
   nYrs <span class='op'>=</span> <span class='cn'>NULL</span>,
-  floor <span class='op'>=</span> <span class='fl'>0</span>,
-  tol <span class='op'>=</span> <span class='fl'>1e-06</span>,
+  surveyBounds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>1</span><span class='op'>)</span>,
+  initBioBounds <span class='op'>=</span> <span class='fl'>0.2</span>,
   plot <span class='op'>=</span> <span class='cn'>F</span>
 <span class='op'>)</span></pre>
 
@@ -134,55 +134,64 @@ used in the test</p>
 Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></td>
     </tr>
     <tr>
+      <th>initialYr</th>
+      <td><p>Numeric Scalar. Year in which the model run was initiated. (Default = 1964)</p></td>
+    </tr>
+    <tr>
       <th>speciesNames</th>
-      <td><p>Character vector. A vector of species names in which to test for persistence.
-(Default = NULL, uses all species found in  <code>biomass</code>)</p></td>
+      <td><p>Character vector. A vector of species names in which to test for reasonableness
+(Default = NULL, uses all species found in  <code>biomass</code>. Species names must be a subset of the Atlantis species names.</p></td>
+    </tr>
+    <tr>
+      <th>realBiomass</th>
+      <td><p>A data frame. biomass time series (from assessments, stock SMART or otherwise) for species.
+CURRENTLY IMPLEMENTED USING SURVDAT DATA ONLY  <code>realBiomass</code> should be in long format with column labels (YEAR,variable,value,Code,Species,isFishedSpecies)
+Biomass units should be in metric tonnes</p></td>
     </tr>
     <tr>
       <th>nYrs</th>
-      <td><p>Numeric scalar. Number of years from the end of the time series that persistence must occur.
-(Default = NULL, persistence must occur throughout entire time series)</p></td>
+      <td><p>Numeric scalar. Number of years from the end of the time series for which reasonableness is checked.
+(Default = NULL, entire time series is used)</p></td>
     </tr>
     <tr>
-      <th>floor</th>
-      <td><p>Numeric scalar. Proportion of initial biomass for which for which all species
-are measured against. (Default = 0, all species need to be non zero). Range should be 0-1</p></td>
+      <th>surveyBounds</th>
+      <td><p>Numeric vector. Size of 1x2 containing the values in which to multiple lower and upper bounds of observed data.
+For example (Default = c(1,1)) indicating use of min and max of observed biomass</p></td>
     </tr>
     <tr>
-      <th>tol</th>
-      <td><p>Numeric scalar. Tolerance level to add to biomass floor (Default = 1E-6)</p></td>
+      <th>initBioBounds</th>
+      <td><p>Numeric scalar. Proportion of initial biomass. Allowable amount in which species are allowed to deviate. This is used for groups/species that dont
+have surveys</p></td>
     </tr>
     <tr>
       <th>plot</th>
       <td><p>A logical value specifying if the function should generate plots or
-not. (Default = F).</p></td>
+not. (Default = F). NOT YET IMPLEMENTED</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Returns a data frame of species which do not meet defined persistence criteria.</p>
-<dt>species</dt><dd><p>The common name of the species/functional group</p></dd>
+    <p>Returns a data frame of species</p>
+<dt>species</dt><dd><p>The common name of the species/functional group as described in Atlantis input file</p></dd>
 <dt>code</dt><dd><p>Atlantis Code for species/functional group</p></dd>
-<dt>initialBiomass</dt><dd><p>Starting value of Biomass for species/functional group</p></dd>
+<dt>initialBiomass</dt><dd><p>Starting value of Biomass for species/functional group. From model output</p></dd>
 <dt>minimumBiomass</dt><dd><p>The smallest value of biomass observed in the run</p></dd>
-<dt>tminimumBiomass</dt><dd><p>The time step in which <code>minimumBiomass</code> occurred</p></dd>
-<dt>t1</dt><dd><p>The first time step persistence was not met</p></dd>
-<dt>tn</dt><dd><p>The last time step persistence was not met</p></dd>
-<dt>nts</dt><dd><p>The total number of time steps that persistence was not met</p></dd>
+<dt>maximumBiomass</dt><dd><p>The largest value of biomass observed in the run</p></dd>
+<dt>t1</dt><dd><p>The first year reasonableness was not met</p></dd>
+<dt>tn</dt><dd><p>The last year reasonableness was not met</p></dd>
+<dt>nts</dt><dd><p>The total number of years that reasonableness was not met</p></dd>
+<dt>modelSkill</dt><dd><p>Measure of the goodness of fit</p></dd>
+<dt>nObs</dt><dd><p>number of observations used in the goodness of fit</p></dd>
+<dt>pass</dt><dd><p>Boolean. Indicates if the Atlantis group passed reasonability</p></dd>
+<dt>test</dt><dd><p>Character. Indicate how <code>pass</code> was determined. If the Atlantis species is fished and the species is a stand alone species in the model
+then survey data is used to assess reasonability. Otherwise deviations from initial biomass is used</p></dd>
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    
-
-<p>Need To Edit. Maybe not applicable. This should be run on an unfished, unperturbed run. Fishing or
-perturbations may legitimately drive groups extinct. However, for our
-historical period, we don’t expect anything to go extinct that is in the
-system now, so this test includes historical fishing, physics, and
-phytoplankton drivers.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"></pre>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+<span class='op'>}</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
