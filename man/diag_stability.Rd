@@ -2,7 +2,7 @@
 % Please edit documentation in R/diag_stability.R
 \name{diag_stability}
 \alias{diag_stability}
-\title{Test for model stability}
+\title{Test for functional group stability}
 \usage{
 diag_stability(modelBiomass, speciesNames, nYrs = 20, sigTest = 0.05, plot = F)
 }

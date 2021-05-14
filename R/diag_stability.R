@@ -1,4 +1,4 @@
-#'Test for model stability
+#'Test for functional group stability
 #'
 #'\code{diag_stability} determines whether the model reaches a steady state
 #'over the last n years of a run. Stability is loosely defined as a species/groups biomass reaching a

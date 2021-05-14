@@ -1,4 +1,4 @@
-#'Test for all functional group persistence
+#'Test for functional group persistence
 #'
 #' Inspects each time point. If at any point in time a species falls below a predefined floor it
 #' is flagged. The floors are specifies as a proportion of initial biomass. The last n years of the run are

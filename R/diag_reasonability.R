@@ -1,4 +1,4 @@
-#'Test for all functional groups to persist within reasonable bounds
+#'Test for functional group reasonability
 #'
 #' Inspects each time point. If at any point in time a species falls below or rises above predefined
 #' bounds it is flagged. The term "reasonable" is based on survey data when available.

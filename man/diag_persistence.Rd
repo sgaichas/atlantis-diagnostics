@@ -2,7 +2,7 @@
 % Please edit documentation in R/diag_persistence.R
 \name{diag_persistence}
 \alias{diag_persistence}
-\title{Test for all functional group persistence}
+\title{Test for functional group persistence}
 \usage{
 diag_persistence(
   modelBiomass,

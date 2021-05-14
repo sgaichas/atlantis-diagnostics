@@ -2,7 +2,7 @@
 % Please edit documentation in R/diag_reasonability.R
 \name{diag_reasonability}
 \alias{diag_reasonability}
-\title{Test for all functional groups to persist within reasonable bounds}
+\title{Test for functional group reasonability}
 \usage{
 diag_reasonability(
   modelBiomass,
