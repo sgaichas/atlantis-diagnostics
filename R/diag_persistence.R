@@ -61,23 +61,10 @@ diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor
 
   # find final time step value
   maxRuntime <- max(modelBiomass$time)
-  atlantisCodes <- modelBiomass %>%
-    dplyr::filter(!is.na(code)) %>%
-    dplyr::distinct(code) %>%
-    dplyr::pull()
-  # use default options
-  if (is.null(speciesCodes)) { # select all species
-    speciesCodes <- atlantisCodes
-  } else {
-    # remove NA's check for codes not in atlantis
-    speciesCodes <- speciesCodes[!is.na(speciesCodes)]
-    # check to make sure no non atlantis codes
-    invalidCodes <- base::setdiff(speciesCodes,atlantisCodes)
 
-    if (!(length(invalidCodes)==0)){
-      stop("Invalid Atlantis group codes: ",paste0(invalidCodes,collapse=", "))
-    }
-  }
+  # check for valid species Codes & clean
+  speciesCodes <- check_species_codes(modelBiomass,speciesCodes)
+
   if (is.null(nYrs)) { # use all time series
     filterTime <- 0
   } else { # last n years
