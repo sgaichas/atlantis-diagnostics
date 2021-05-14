@@ -6,8 +6,8 @@
 #'@param modelBiomass A data frame. Total biomass of all groups over time, read in from
 #'Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.
 #'@param initialYr Numeric Scalar. Year in which the model run was initiated. (Default = 1964)
-#'@param speciesNames Character vector. A vector of species names in which to test for reasonableness
-#'(Default = NULL, uses all species found in  \code{biomass}. Species names must be a subset of the Atlantis species names.
+#'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for reasonableness
+#'(Default = NULL, uses all species found in  \code{modelBiomass}. Species codes should be a subset of the Atlantis species codes
 #'@param realBiomass A data frame. biomass time series (from assessments, stock SMART or otherwise) for species.
 #' CURRENTLY IMPLEMENTED USING SURVDAT DATA ONLY  \code{realBiomass} should be in long format with column labels (YEAR,variable,value,Code,Species,isFishedSpecies)
 #'  Biomass units should be in metric tonnes
@@ -15,8 +15,8 @@
 #' (Default = NULL, entire time series is used)
 #'@param surveyBounds Numeric vector. Size of 1x2 containing the values in which to multiple lower and upper bounds of observed data.
 #'For example (Default = c(1,1)) indicating use of min and max of observed biomass
-#'@param initBioBounds Numeric scalar. Proportion of initial biomass. Allowable amount in which species are allowed to deviate. This is used for groups/species that dont
-#'have surveys
+#'@param initBioBounds Numeric vector. Size of 1x2 containing lower and upper bound proportions used to scale initial biomass.
+#'This is used for groups/species that dont have surveys
 #'@param plot A logical value specifying if the function should generate plots or
 #'not. (Default = F). NOT YET IMPLEMENTED
 #'
@@ -48,12 +48,15 @@
 
 #'}
 
-diag_reasonability <- function(modelBiomass, initialYr=1964, speciesNames=NULL, realBiomass, nYrs = NULL,
+diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, realBiomass, nYrs = NULL,
                                surveyBounds = c(1,1), initBioBounds = 0.2, plot=F){
 
   ################################################
   ########### model output #######################
   ################################################
+
+  # check for valid species Codes & clean
+  speciesCodes <- check_species_codes(modelBiomass,speciesCodes)
 
   # list of Atlantis species and Atlantis codes. Pulled from model output
   species <- modelBiomass %>%
@@ -106,16 +109,6 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesNames=NULL, 
 
   # find final year of model run
   maxRuntime <- max(modelBiomass$year)
-
-  # define list of species to use
-  if (is.null(speciesNames)) { # select all species (default)
-    speciesCodes <- species$code
-  } else { # find species code based on user argument
-    # list of user input species must be the species names as listed in atlantis Name field of Atlantis input file
-    speciesCodes <- species %>%
-      dplyr::filter(species %in% speciesNames) %>%
-      dplyr::pull(code)
-  }
 
   # determine time frame in which to perform "test"
   if (is.null(nYrs)) { # use all time series
