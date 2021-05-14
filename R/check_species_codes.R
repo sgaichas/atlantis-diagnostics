@@ -28,5 +28,6 @@ check_species_codes <- function(modelBiomass,speciesCodes){
     }
   }
 
+  return(speciesCodes)
 
 }
