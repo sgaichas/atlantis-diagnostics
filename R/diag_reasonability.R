@@ -28,8 +28,9 @@
 #'\item{species}{The common name of the species/functional group as described in Atlantis input file}
 #'\item{code}{Atlantis Code for species/functional group}
 #'\item{initialBiomass}{Starting value of Biomass for species/functional group. From model output}
-#'\item{minimumBiomass}{The smallest value of biomass observed in the run}
-#'\item{maximumBiomass}{The largest value of biomass observed in the run}
+#'\item{minBiomass}{The smallest value of biomass observed in the run}
+#'\item{maxBiomass}{The largest value of biomass observed in the run}
+#'\item{propInitiBio}{The maxBiomass as a proportion of the inintial biomass}
 #'\item{t1}{The first year reasonableness was not met}
 #'\item{tn}{The last year reasonableness was not met}
 #'\item{nts}{The total number of years that reasonableness was not met}
@@ -141,8 +142,10 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
         dplyr::filter(year > filterTime) %>%
         dplyr::mutate(reasonable = (modelBiomass < initialBiomass*initBioBounds[2]) & (modelBiomass >= initialBiomass*initBioBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(modelBiomass,initialBiomass)$mef) %>%
-        dplyr::mutate(minBio = min(modelBiomass)) %>%
-        dplyr::mutate(maxBio = max(modelBiomass))
+        dplyr::mutate(minBiomass = min(modelBiomass)) %>%
+        dplyr::mutate(maxBiomass = max(modelBiomass)) %>%
+        dplyr::mutate(propInitBio = maxBiomass/initialBiomass)
+
 
       test <- "initialBio"
 
@@ -156,8 +159,9 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
         dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
         dplyr::mutate(reasonable = (modelBiomass < max(tot.biomass)*surveyBounds[2]) & (modelBiomass > min(tot.biomass)*surveyBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(tot.biomass,modelBiomass)$mef) %>%
-        dplyr::mutate(minBio = min(modelBiomass)) %>%
-        dplyr::mutate(maxBio = max(modelBiomass))
+        dplyr::mutate(minBiomass = min(modelBiomass)) %>%
+        dplyr::mutate(maxBiomass = max(modelBiomass)) %>%
+        dplyr::mutate(propInitBio = maxBiomass/initialBiomass)
 
 
       test <- "data"
@@ -171,7 +175,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
     if(nrow(out) == 0) { # all pass
       # create output
       out <- mb %>%
-        dplyr::select(code,species,initialBiomass,modelSkill,minBio,maxBio) %>%
+        dplyr::select(code,species,initialBiomass,modelSkill,minBiomass,maxBiomass,propInitBio) %>%
         dplyr::distinct() %>%
         dplyr::mutate(t1 = NA) %>%
         dplyr::mutate(tn = NA) %>%
@@ -183,9 +187,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
         dplyr::filter(reasonable == F) %>%
         dplyr::mutate(t1 = min(year)) %>%
         dplyr::mutate(tn = max(year)) %>%
-        #dplyr::mutate(tmin = ) %>%
-        #dplyr::mutate(tmax = ) %>%
-        dplyr::group_by(code,species,initialBiomass,t1,tn,modelSkill,minBio,maxBio) %>%
+        dplyr::group_by(code,species,initialBiomass,t1,tn,modelSkill,minBiomass,maxBiomass,propInitBio) %>%
         dplyr::summarize(nts = sum(!reasonable),.groups="drop") %>%
         dplyr::mutate(pass = dplyr::if_else(nts>0,F,T)) %>%
         dplyr::mutate(test = test)
@@ -197,7 +199,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
 
   }
   reasonable <- reasonable %>%
-    dplyr::arrange(pass,modelSkill)
+    dplyr::arrange(pass,propInitBio)
 
   return(reasonable)
 

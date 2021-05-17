@@ -46,8 +46,9 @@ Returns a data frame of species
 \item{species}{The common name of the species/functional group as described in Atlantis input file}
 \item{code}{Atlantis Code for species/functional group}
 \item{initialBiomass}{Starting value of Biomass for species/functional group. From model output}
-\item{minimumBiomass}{The smallest value of biomass observed in the run}
-\item{maximumBiomass}{The largest value of biomass observed in the run}
+\item{minBiomass}{The smallest value of biomass observed in the run}
+\item{maxBiomass}{The largest value of biomass observed in the run}
+\item{propInitiBio}{The maxBiomass as a proportion of the inintial biomass}
 \item{t1}{The first year reasonableness was not met}
 \item{tn}{The last year reasonableness was not met}
 \item{nts}{The total number of years that reasonableness was not met}
