@@ -11,7 +11,7 @@ diag_reasonability(
   realBiomass,
   nYrs = NULL,
   surveyBounds = c(1, 1),
-  initBioBounds = 0.2,
+  initBioBounds = c(0.5, 10),
   plot = F
 )
 }

@@ -49,7 +49,7 @@
 #'}
 
 diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, realBiomass, nYrs = NULL,
-                               surveyBounds = c(1,1), initBioBounds = 0.2, plot=F){
+                               surveyBounds = c(1,1), initBioBounds = c(0.5,10), plot=F){
 
   ################################################
   ########### model output #######################
@@ -139,9 +139,10 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
       mb <- modelBiomass %>%
         dplyr::filter(code == acode) %>%
         dplyr::filter(year > filterTime) %>%
-        dplyr::mutate(reasonable = (modelBiomass < initialBiomass*(1+initBioBounds)) & (modelBiomass > initialBiomass*(1-initBioBounds))) %>%
+        dplyr::mutate(reasonable = (modelBiomass < initialBiomass*initBioBounds[2]) & (modelBiomass >= initialBiomass*initBioBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(modelBiomass,initialBiomass)$mef) %>%
-        dplyr::mutate(nObs = calc_mef(modelBiomass,initialBiomass)$n)
+        dplyr::mutate(minBio = min(modelBiomass)) %>%
+        dplyr::mutate(maxBio = max(modelBiomass))
 
       test <- "initialBio"
 
@@ -155,7 +156,9 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
         dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
         dplyr::mutate(reasonable = (modelBiomass < max(tot.biomass)*surveyBounds[2]) & (modelBiomass > min(tot.biomass)*surveyBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(tot.biomass,modelBiomass)$mef) %>%
-        dplyr::mutate(nObs = calc_mef(tot.biomass,modelBiomass)$n)
+        dplyr::mutate(minBio = min(modelBiomass)) %>%
+        dplyr::mutate(maxBio = max(modelBiomass))
+
 
       test <- "data"
     }
@@ -168,7 +171,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
     if(nrow(out) == 0) { # all pass
       # create output
       out <- mb %>%
-        dplyr::select(code,species,initialBiomass,modelSkill,nObs) %>%
+        dplyr::select(code,species,initialBiomass,modelSkill,minBio,maxBio) %>%
         dplyr::distinct() %>%
         dplyr::mutate(t1 = NA) %>%
         dplyr::mutate(tn = NA) %>%
@@ -180,7 +183,9 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
         dplyr::filter(reasonable == F) %>%
         dplyr::mutate(t1 = min(year)) %>%
         dplyr::mutate(tn = max(year)) %>%
-        dplyr::group_by(code,species,initialBiomass,t1,tn,modelSkill,nObs) %>%
+        #dplyr::mutate(tmin = ) %>%
+        #dplyr::mutate(tmax = ) %>%
+        dplyr::group_by(code,species,initialBiomass,t1,tn,modelSkill,minBio,maxBio) %>%
         dplyr::summarize(nts = sum(!reasonable),.groups="drop") %>%
         dplyr::mutate(pass = dplyr::if_else(nts>0,F,T)) %>%
         dplyr::mutate(test = test)
