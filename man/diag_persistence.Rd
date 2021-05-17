@@ -6,7 +6,7 @@
 \usage{
 diag_persistence(
   modelBiomass,
-  speciesNames = NULL,
+  speciesCodes = NULL,
   nYrs = NULL,
   floor = 0,
   tol = 1e-06,
@@ -17,8 +17,8 @@ diag_persistence(
 \item{modelBiomass}{A data frame. Total biomass of all groups over time, read in from
 Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 
-\item{speciesNames}{Character vector. A vector of species names in which to test for persistence.
-(Default = NULL, uses all species found in  \code{biomass})}
+\item{speciesCodes}{Character vector. A vector of Atlantis species codes in which to test for persistence.
+(Default = NULL, uses all species found in  \code{modelBiomass})}
 
 \item{nYrs}{Numeric scalar. Number of years from the end of the time series that persistence must occur.
 (Default = NULL, persistence must occur throughout entire time series)}
@@ -39,6 +39,7 @@ Returns a data frame of species which do not meet defined persistence criteria.
 \item{initialBiomass}{Starting value of Biomass for species/functional group}
 \item{minimumBiomass}{The smallest value of biomass observed in the run}
 \item{tminimumBiomass}{The time step in which \code{minimumBiomass} occurred }
+\item{proportionInitBio }{The proportion of initial biomass at \code{tminimumBiomass}}
 \item{t1}{The first time step persistence was not met}
 \item{tn}{The last time step persistence was not met}
 \item{nts}{The total number of time steps that persistence was not met}
@@ -48,15 +49,6 @@ Inspects each time point. If at any point in time a species falls below a predef
 is flagged. The floors are specifies as a proportion of initial biomass. The last n years of the run are
 used in the test
 }
-\section{Details}{
-
-Need To Edit. Maybe not applicable. This should be run on an unfished, unperturbed run. Fishing or
-perturbations may legitimately drive groups extinct. However, for our
-historical period, we don’t expect anything to go extinct that is in the
-system now, so this test includes historical fishing, physics, and
-phytoplankton drivers.
-}
-
 \examples{
 \dontrun{
 # Declare paths to files required
@@ -64,14 +56,15 @@ biol.file <- "neus_outputBiomIndx.txt"
 file_fgs <- "neus_groups.csv"
 # use atlantisom to read them in
 fgs <- atlantisom::load_fgs(inDir,file_fgs)
-biomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
+modelBiomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
 
 # find all species that do not have biomass > 0 for any time during the run.
-diag_persist(biomass)
+
+diag_persistence(modelBiomass,speciesCodes=NULL, nYrs = NULL, floor = 0)
 
 # only evaluate herring. Require stability over the last 10 years of the run and all values should
 exceed 10\% of initial biomass
-diag_persist(biomass, speciesNames="Herring", nYrs = 10, floor = 0.1)
+diag_persistence(modlBiomass, speciesCodes="HER", nYrs = 10, floor = 0.1)
 
 }
 }

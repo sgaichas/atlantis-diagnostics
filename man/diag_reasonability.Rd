@@ -7,11 +7,11 @@
 diag_reasonability(
   modelBiomass,
   initialYr = 1964,
-  speciesNames = NULL,
+  speciesCodes = NULL,
   realBiomass,
   nYrs = NULL,
   surveyBounds = c(1, 1),
-  initBioBounds = 0.2,
+  initBioBounds = c(0.5, 10),
   plot = F
 )
 }
@@ -21,8 +21,8 @@ Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 
 \item{initialYr}{Numeric Scalar. Year in which the model run was initiated. (Default = 1964)}
 
-\item{speciesNames}{Character vector. A vector of species names in which to test for reasonableness
-(Default = NULL, uses all species found in  \code{biomass}. Species names must be a subset of the Atlantis species names.}
+\item{speciesCodes}{Character vector. A vector of Atlantis species codes in which to test for reasonableness
+(Default = NULL, uses all species found in  \code{modelBiomass}. Species codes should be a subset of the Atlantis species codes}
 
 \item{realBiomass}{A data frame. biomass time series (from assessments, stock SMART or otherwise) for species.
 CURRENTLY IMPLEMENTED USING SURVDAT DATA ONLY  \code{realBiomass} should be in long format with column labels (YEAR,variable,value,Code,Species,isFishedSpecies)
@@ -34,8 +34,8 @@ Biomass units should be in metric tonnes}
 \item{surveyBounds}{Numeric vector. Size of 1x2 containing the values in which to multiple lower and upper bounds of observed data.
 For example (Default = c(1,1)) indicating use of min and max of observed biomass}
 
-\item{initBioBounds}{Numeric scalar. Proportion of initial biomass. Allowable amount in which species are allowed to deviate. This is used for groups/species that dont
-have surveys}
+\item{initBioBounds}{Numeric vector. Size of 1x2 containing lower and upper bound proportions used to scale initial biomass.
+This is used for groups/species that dont have surveys}
 
 \item{plot}{A logical value specifying if the function should generate plots or
 not. (Default = F). NOT YET IMPLEMENTED}
@@ -46,8 +46,9 @@ Returns a data frame of species
 \item{species}{The common name of the species/functional group as described in Atlantis input file}
 \item{code}{Atlantis Code for species/functional group}
 \item{initialBiomass}{Starting value of Biomass for species/functional group. From model output}
-\item{minimumBiomass}{The smallest value of biomass observed in the run}
-\item{maximumBiomass}{The largest value of biomass observed in the run}
+\item{minBiomass}{The smallest value of biomass observed in the run}
+\item{maxBiomass}{The largest value of biomass observed in the run}
+\item{propInitiBio}{The maxBiomass as a proportion of the inintial biomass}
 \item{t1}{The first year reasonableness was not met}
 \item{tn}{The last year reasonableness was not met}
 \item{nts}{The total number of years that reasonableness was not met}

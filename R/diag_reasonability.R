@@ -6,8 +6,8 @@
 #'@param modelBiomass A data frame. Total biomass of all groups over time, read in from
 #'Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.
 #'@param initialYr Numeric Scalar. Year in which the model run was initiated. (Default = 1964)
-#'@param speciesNames Character vector. A vector of species names in which to test for reasonableness
-#'(Default = NULL, uses all species found in  \code{biomass}. Species names must be a subset of the Atlantis species names.
+#'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for reasonableness
+#'(Default = NULL, uses all species found in  \code{modelBiomass}. Species codes should be a subset of the Atlantis species codes
 #'@param realBiomass A data frame. biomass time series (from assessments, stock SMART or otherwise) for species.
 #' CURRENTLY IMPLEMENTED USING SURVDAT DATA ONLY  \code{realBiomass} should be in long format with column labels (YEAR,variable,value,Code,Species,isFishedSpecies)
 #'  Biomass units should be in metric tonnes
@@ -15,8 +15,8 @@
 #' (Default = NULL, entire time series is used)
 #'@param surveyBounds Numeric vector. Size of 1x2 containing the values in which to multiple lower and upper bounds of observed data.
 #'For example (Default = c(1,1)) indicating use of min and max of observed biomass
-#'@param initBioBounds Numeric scalar. Proportion of initial biomass. Allowable amount in which species are allowed to deviate. This is used for groups/species that dont
-#'have surveys
+#'@param initBioBounds Numeric vector. Size of 1x2 containing lower and upper bound proportions used to scale initial biomass.
+#'This is used for groups/species that dont have surveys
 #'@param plot A logical value specifying if the function should generate plots or
 #'not. (Default = F). NOT YET IMPLEMENTED
 #'
@@ -28,8 +28,9 @@
 #'\item{species}{The common name of the species/functional group as described in Atlantis input file}
 #'\item{code}{Atlantis Code for species/functional group}
 #'\item{initialBiomass}{Starting value of Biomass for species/functional group. From model output}
-#'\item{minimumBiomass}{The smallest value of biomass observed in the run}
-#'\item{maximumBiomass}{The largest value of biomass observed in the run}
+#'\item{minBiomass}{The smallest value of biomass observed in the run}
+#'\item{maxBiomass}{The largest value of biomass observed in the run}
+#'\item{propInitiBio}{The maxBiomass as a proportion of the inintial biomass}
 #'\item{t1}{The first year reasonableness was not met}
 #'\item{tn}{The last year reasonableness was not met}
 #'\item{nts}{The total number of years that reasonableness was not met}
@@ -48,12 +49,15 @@
 
 #'}
 
-diag_reasonability <- function(modelBiomass, initialYr=1964, speciesNames=NULL, realBiomass, nYrs = NULL,
-                               surveyBounds = c(1,1), initBioBounds = 0.2, plot=F){
+diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, realBiomass, nYrs = NULL,
+                               surveyBounds = c(1,1), initBioBounds = c(0.5,10), plot=F){
 
   ################################################
   ########### model output #######################
   ################################################
+
+  # check for valid species Codes & clean
+  speciesCodes <- check_species_codes(modelBiomass,speciesCodes)
 
   # list of Atlantis species and Atlantis codes. Pulled from model output
   species <- modelBiomass %>%
@@ -107,16 +111,6 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesNames=NULL, 
   # find final year of model run
   maxRuntime <- max(modelBiomass$year)
 
-  # define list of species to use
-  if (is.null(speciesNames)) { # select all species (default)
-    speciesCodes <- species$code
-  } else { # find species code based on user argument
-    # list of user input species must be the species names as listed in atlantis Name field of Atlantis input file
-    speciesCodes <- species %>%
-      dplyr::filter(species %in% speciesNames) %>%
-      dplyr::pull(code)
-  }
-
   # determine time frame in which to perform "test"
   if (is.null(nYrs)) { # use all time series
     filterTime <- initialYr
@@ -146,9 +140,12 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesNames=NULL, 
       mb <- modelBiomass %>%
         dplyr::filter(code == acode) %>%
         dplyr::filter(year > filterTime) %>%
-        dplyr::mutate(reasonable = (modelBiomass < initialBiomass*(1+initBioBounds)) & (modelBiomass > initialBiomass*(1-initBioBounds))) %>%
+        dplyr::mutate(reasonable = (modelBiomass < initialBiomass*initBioBounds[2]) & (modelBiomass >= initialBiomass*initBioBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(modelBiomass,initialBiomass)$mef) %>%
-        dplyr::mutate(nObs = calc_mef(modelBiomass,initialBiomass)$n)
+        dplyr::mutate(minBiomass = min(modelBiomass)) %>%
+        dplyr::mutate(maxBiomass = max(modelBiomass)) %>%
+        dplyr::mutate(propInitBio = maxBiomass/initialBiomass)
+
 
       test <- "initialBio"
 
@@ -162,7 +159,10 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesNames=NULL, 
         dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
         dplyr::mutate(reasonable = (modelBiomass < max(tot.biomass)*surveyBounds[2]) & (modelBiomass > min(tot.biomass)*surveyBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(tot.biomass,modelBiomass)$mef) %>%
-        dplyr::mutate(nObs = calc_mef(tot.biomass,modelBiomass)$n)
+        dplyr::mutate(minBiomass = min(modelBiomass)) %>%
+        dplyr::mutate(maxBiomass = max(modelBiomass)) %>%
+        dplyr::mutate(propInitBio = maxBiomass/initialBiomass)
+
 
       test <- "data"
     }
@@ -175,7 +175,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesNames=NULL, 
     if(nrow(out) == 0) { # all pass
       # create output
       out <- mb %>%
-        dplyr::select(code,species,initialBiomass,modelSkill,nObs) %>%
+        dplyr::select(code,species,initialBiomass,modelSkill,minBiomass,maxBiomass,propInitBio) %>%
         dplyr::distinct() %>%
         dplyr::mutate(t1 = NA) %>%
         dplyr::mutate(tn = NA) %>%
@@ -187,7 +187,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesNames=NULL, 
         dplyr::filter(reasonable == F) %>%
         dplyr::mutate(t1 = min(year)) %>%
         dplyr::mutate(tn = max(year)) %>%
-        dplyr::group_by(code,species,initialBiomass,t1,tn,modelSkill,nObs) %>%
+        dplyr::group_by(code,species,initialBiomass,t1,tn,modelSkill,minBiomass,maxBiomass,propInitBio) %>%
         dplyr::summarize(nts = sum(!reasonable),.groups="drop") %>%
         dplyr::mutate(pass = dplyr::if_else(nts>0,F,T)) %>%
         dplyr::mutate(test = test)
@@ -199,7 +199,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesNames=NULL, 
 
   }
   reasonable <- reasonable %>%
-    dplyr::arrange(pass,modelSkill)
+    dplyr::arrange(pass,propInitBio)
 
   return(reasonable)
 
