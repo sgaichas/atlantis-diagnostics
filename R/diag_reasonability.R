@@ -62,11 +62,11 @@
 #' # Allow species with data to be bounded by 100 x max observed biomass and 1 x min observed biomass.
 #' # For species without data allow model biomass to lie between 0.5 and 2 times initial biomass
 #'
-#' diag_reaonability(modelBiomass=modelBiomass, initialYear = 1964, realBiomass=realBiomass,
+#' diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, realBiomass=realBiomass,
 #' surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 #'
 #' # Only perform test on herring and white hake.
-#' diag_reaonability(modelBiomass=modelBiomass, initialYear = 1964, speciesCodes =c("MAK","WHK"), realBiomass=realBiomass,
+#' diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, speciesCodes =c("MAK","WHK"), realBiomass=realBiomass,
 #' surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 #'}
 

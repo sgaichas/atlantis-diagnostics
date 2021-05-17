@@ -64,5 +64,27 @@ bounds it is flagged. The term "reasonable" is based on survey data when availab
 }
 \examples{
 \dontrun{
+# Declare paths to files required
+biol.file <- "neus_outputBiomIndx.txt"
+file_fgs <- "neus_groups.csv"
+# use atlantisom to read them in
+fgs <- atlantisom::load_fgs(inDir,file_fgs)
+modelBiomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
+# read in survey biomass and convert to metric tons
+realBiomass <- readRDS(paste0(dataDir,"sweptAreaBiomassNEUS.rds")) \%>\%
+      dplyr::filter(variable \%in\% c("tot.biomass")) \%>\%
+      dplyr::mutate(value=ifelse(grepl("kg$",units),value/1000,value)) \%>\%
+      dplyr::select(-units)
+
+# Perform reasonability test on all species/groups using the last 20 years of the run.
+# Allow species with data to be bounded by 100 x max observed biomass and 1 x min observed biomass.
+# For species without data allow model biomass to lie between 0.5 and 2 times initial biomass
+
+diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, realBiomass=realBiomass,
+surveyBounds = c(1,100), initBioBounds = c(0.5,2))
+
+# Only perform test on herring and white hake.
+diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, speciesCodes =c("MAK","WHK"), realBiomass=realBiomass,
+surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 }
 }
