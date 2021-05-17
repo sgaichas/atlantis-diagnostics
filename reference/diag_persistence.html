@@ -118,7 +118,7 @@ used in the test</p>
 
     <pre class="usage"><span class='fu'>diag_persistence</span><span class='op'>(</span>
   <span class='va'>modelBiomass</span>,
-  speciesNames <span class='op'>=</span> <span class='cn'>NULL</span>,
+  speciesCodes <span class='op'>=</span> <span class='cn'>NULL</span>,
   nYrs <span class='op'>=</span> <span class='cn'>NULL</span>,
   floor <span class='op'>=</span> <span class='fl'>0</span>,
   tol <span class='op'>=</span> <span class='fl'>1e-06</span>,
@@ -134,9 +134,9 @@ used in the test</p>
 Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></td>
     </tr>
     <tr>
-      <th>speciesNames</th>
-      <td><p>Character vector. A vector of species names in which to test for persistence.
-(Default = NULL, uses all species found in  <code>biomass</code>)</p></td>
+      <th>speciesCodes</th>
+      <td><p>Character vector. A vector of Atlantis species codes in which to test for persistence.
+(Default = NULL, uses all species found in  <code>modelBiomass</code>)</p></td>
     </tr>
     <tr>
       <th>nYrs</th>
@@ -167,19 +167,11 @@ not. (Default = F).</p></td>
 <dt>initialBiomass</dt><dd><p>Starting value of Biomass for species/functional group</p></dd>
 <dt>minimumBiomass</dt><dd><p>The smallest value of biomass observed in the run</p></dd>
 <dt>tminimumBiomass</dt><dd><p>The time step in which <code>minimumBiomass</code> occurred</p></dd>
+<dt>proportionInitBio </dt><dd><p>The proportion of initial biomass at <code>tminimumBiomass</code></p></dd>
 <dt>t1</dt><dd><p>The first time step persistence was not met</p></dd>
 <dt>tn</dt><dd><p>The last time step persistence was not met</p></dd>
 <dt>nts</dt><dd><p>The total number of time steps that persistence was not met</p></dd>
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    
-
-<p>Need To Edit. Maybe not applicable. This should be run on an unfished, unperturbed run. Fishing or
-perturbations may legitimately drive groups extinct. However, for our
-historical period, we don’t expect anything to go extinct that is in the
-system now, so this test includes historical fishing, physics, and
-phytoplankton drivers.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"></pre>
