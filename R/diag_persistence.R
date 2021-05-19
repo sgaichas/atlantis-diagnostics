@@ -113,6 +113,8 @@ diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor
 
   }
 
+  persistence <- persistence %>%
+    dplyr::arrange(pass,proportionInitBio)
 
   return(persistence)
 
