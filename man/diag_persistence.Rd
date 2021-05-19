@@ -9,6 +9,7 @@ diag_persistence(
   speciesCodes = NULL,
   nYrs = NULL,
   floor = 0,
+  display = NULL,
   tol = 1e-06,
   plot = F
 )
@@ -25,6 +26,8 @@ Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 
 \item{floor}{Numeric scalar. Proportion of initial biomass for which for which all species
 are measured against. (Default = 0, all species need to be non zero). Range should be 0-1}
+
+\item{display}{Boolean. Flag to indicate whether to return only species that pass the test, fail the test, or all species (Default = NULL)}
 
 \item{tol}{Numeric scalar. Tolerance level to add to biomass floor (Default = 1E-6)}
 
@@ -43,6 +46,7 @@ Returns a data frame of species which do not meet defined persistence criteria.
 \item{t1}{The first time step persistence was not met}
 \item{tn}{The last time step persistence was not met}
 \item{nts}{The total number of time steps that persistence was not met}
+\item{pass}{Boolean. Indicates if the Atlantis group passed persistence test}
 }
 \description{
 Inspects each time point. If at any point in time a species falls below a predefined floor it
