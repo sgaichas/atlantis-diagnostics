@@ -4,11 +4,20 @@
 \alias{diag_stability}
 \title{Test for functional group stability}
 \usage{
-diag_stability(modelBiomass, speciesCodes, nYrs = 20, sigTest = 0.05, plot = F)
+diag_stability(
+  modelBiomass,
+  initialYr = 1964,
+  speciesCodes,
+  nYrs = 20,
+  sigTest = 0.05,
+  plot = F
+)
 }
 \arguments{
 \item{modelBiomass}{A data frame. Total biomass of all groups over time, read in from
 Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
+
+\item{initialYr}{Numeric Scalar. Year in which the model run was initiated. (Default = 1964)}
 
 \item{speciesCodes}{Character vector. A vector of Atlantis species codes in which to test for stability.
 (Default = NULL, uses all species found in  \code{modelBiomass})}
@@ -24,7 +33,7 @@ Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 Returns a data frame of all species and how they measure up against the stability criterion
 \item{code}{Atlantis Code for species/functional group}
 \item{species}{The common name of the species/functional group}
-\item{slope}{Double. The value of the slope parameter (time) }
+\item{mtperyear}{Double. The value of the slope parameter (year) }
 \item{pValue}{Double. The p-value associated with the slope parameter (time)}
 \item{pass}{Logical. Does the species/group pass the test for stability}
 }
@@ -41,6 +50,8 @@ Formally the following model is fit to the last n years of the run:
 \deqn{biomass_t = \mu + \beta.t + \epsilon_t  where \epsilon_t ~ IID N(0,\sigma^2)}
 
 where null hypothesis,  \deqn{H0:\beta=0}
+
+Note: annual biomass is used in fitting.
 }
 
 \examples{
