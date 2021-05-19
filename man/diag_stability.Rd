@@ -33,6 +33,8 @@ Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 Returns a data frame of all species and how they measure up against the stability criterion
 \item{code}{Atlantis Code for species/functional group}
 \item{species}{The common name of the species/functional group}
+\item{t1Biomass}{Value of biomass for first years data used in the fit}
+\item{relChange}{Rate of increase relative to \code{t1Biomass}(\code{mtperyear}/\code{t1Biomass})}
 \item{mtperyear}{Double. The value of the slope parameter (year) }
 \item{pValue}{Double. The p-value associated with the slope parameter (time)}
 \item{pass}{Logical. Does the species/group pass the test for stability}
