@@ -11,7 +11,7 @@
 #'@param nYrs Numeric scalar. Number of years from the end of the time series that persistence must occur.
 #' (Default = NULL, persistence must occur throughout entire time series)
 #'@param floor Numeric scalar. Proportion of initial biomass for which for which all species
-#'are measured against. (Default = 0, all species need to be non zero). Range should be 0-1
+#'are measured against. (Default = 0.1, all species need to be above 10% of initial biomass). Range should be 0-1
 #'@param display Boolean. Flag to indicate whether to return only species that pass the test, fail the test, or all species (Default = NULL)
 #'@param tol Numeric scalar. Tolerance level to add to biomass floor (Default = 1E-6)
 #'@param plot A logical value specifying if the function should generate plots or
@@ -55,7 +55,7 @@
 #'
 #'}
 
-diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor = 0, display=NULL, tol = 1E-6, plot=F){
+diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor = 0.1, display=NULL, tol = 1E-6, plot=F){
 
   # need in annual units? Or fail when any output timestep below threshold?
   # make safe for migratory species, assume that over the course of the year mean B > 0.
