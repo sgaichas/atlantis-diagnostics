@@ -31,6 +31,9 @@
 #'\item{minBiomass}{The smallest value of biomass observed in the run}
 #'\item{maxBiomass}{The largest value of biomass observed in the run}
 #'\item{propInitiBio}{The maxBiomass as a proportion of the inintial biomass}
+#'\item{propBelowLower}{Magnitude of lower bound excedence as a proportion of lower threshold}
+#'\item{propAboveUpper}{Magnitude of upper bound excedence as a proportion of upper threshold}
+#'\item{maxExceedance}{max of \code{propBelowLower} and \code{propBelowLower}}
 #'\item{t1}{The first year reasonableness was not met}
 #'\item{tn}{The last year reasonableness was not met}
 #'\item{nts}{The total number of years that reasonableness was not met}
@@ -136,7 +139,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
   if (is.null(nYrs)) { # use all time series
     filterTime <- initialYr
   } else { # last n years
-    filterTime <- maxRuntime - nYrs + 1
+    filterTime <- maxRuntime - nYrs
   }
 
   # now find if model biomass falls within real biomass * bounds
@@ -165,8 +168,12 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
         dplyr::mutate(modelSkill = calc_mef(modelBiomass,initialBiomass)$mef) %>%
         dplyr::mutate(minBiomass = min(modelBiomass)) %>%
         dplyr::mutate(maxBiomass = max(modelBiomass)) %>%
-        dplyr::mutate(propInitBio = maxBiomass/initialBiomass)
-
+        dplyr::mutate(propInitBio = maxBiomass/initialBiomass) %>%
+        dplyr::mutate(propAboveUpper = maxBiomass/(initialBiomass*initBioBounds[2]) - 1) %>%
+        dplyr::mutate(propBelowLower = -minBiomass/(initialBiomass*initBioBounds[1]) + 1) %>%
+        dplyr::group_by(code) %>%
+        dplyr::mutate(maxExceedance = max(propBelowLower,propAboveUpper)) %>%
+        dplyr::ungroup()
 
       test <- "initialBio"
 
@@ -182,8 +189,12 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
         dplyr::mutate(modelSkill = calc_mef(tot.biomass,modelBiomass)$mef) %>%
         dplyr::mutate(minBiomass = min(modelBiomass)) %>%
         dplyr::mutate(maxBiomass = max(modelBiomass)) %>%
-        dplyr::mutate(propInitBio = maxBiomass/initialBiomass)
-
+        dplyr::mutate(propInitBio = maxBiomass/initialBiomass) %>%
+        dplyr::mutate(propAboveUpper = maxBiomass/(max(tot.biomass)*surveyBounds[2]) - 1) %>%
+        dplyr::mutate(propBelowLower = -minBiomass/(min(tot.biomass)*surveyBounds[1]) + 1) %>%
+        dplyr::group_by(code) %>%
+        dplyr::mutate(maxExceedance = max(propBelowLower,propAboveUpper)) %>%
+        dplyr::ungroup()
 
       test <- "data"
     }
@@ -196,7 +207,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
     if(nrow(out) == 0) { # all pass
       # create output
       out <- mb %>%
-        dplyr::select(code,species,initialBiomass,modelSkill,minBiomass,maxBiomass,propInitBio) %>%
+        dplyr::select(code,species,initialBiomass,modelSkill,minBiomass,maxBiomass,propInitBio,propBelowLower,propAboveUpper,maxExceedance) %>%
         dplyr::distinct() %>%
         dplyr::mutate(t1 = NA) %>%
         dplyr::mutate(tn = NA) %>%
@@ -208,7 +219,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
         dplyr::filter(reasonable == F) %>%
         dplyr::mutate(t1 = min(year)) %>%
         dplyr::mutate(tn = max(year)) %>%
-        dplyr::group_by(code,species,initialBiomass,t1,tn,modelSkill,minBiomass,maxBiomass,propInitBio) %>%
+        dplyr::group_by(code,species,initialBiomass,t1,tn,modelSkill,minBiomass,maxBiomass,propInitBio,propBelowLower,propAboveUpper,maxExceedance) %>%
         dplyr::summarize(nts = sum(!reasonable),.groups="drop") %>%
         dplyr::mutate(pass = dplyr::if_else(nts>0,F,T)) %>%
         dplyr::mutate(test = test)
@@ -220,7 +231,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
 
   }
   reasonable <- reasonable %>%
-    dplyr::arrange(pass,propInitBio)
+    dplyr::arrange(pass,desc(maxExceedance))
 
   return(reasonable)
 
