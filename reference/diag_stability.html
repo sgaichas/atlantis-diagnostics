@@ -116,7 +116,14 @@ over the last n years of a run. Stability is loosely defined as a species/groups
 stable level (measured as having no trend in a defined time range).</p>
     </div>
 
-    <pre class="usage"><span class='fu'>diag_stability</span><span class='op'>(</span><span class='va'>modelBiomass</span>, <span class='va'>speciesCodes</span>, nYrs <span class='op'>=</span> <span class='fl'>20</span>, sigTest <span class='op'>=</span> <span class='fl'>0.05</span>, plot <span class='op'>=</span> <span class='cn'>F</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>diag_stability</span><span class='op'>(</span>
+  <span class='va'>modelBiomass</span>,
+  initialYr <span class='op'>=</span> <span class='fl'>1964</span>,
+  <span class='va'>speciesCodes</span>,
+  nYrs <span class='op'>=</span> <span class='fl'>20</span>,
+  sigTest <span class='op'>=</span> <span class='fl'>0.05</span>,
+  plot <span class='op'>=</span> <span class='cn'>F</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -125,6 +132,10 @@ stable level (measured as having no trend in a defined time range).</p>
       <th>modelBiomass</th>
       <td><p>A data frame. Total biomass of all groups over time, read in from
 Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></td>
+    </tr>
+    <tr>
+      <th>initialYr</th>
+      <td><p>Numeric Scalar. Year in which the model run was initiated. (Default = 1964)</p></td>
     </tr>
     <tr>
       <th>speciesCodes</th>
@@ -151,7 +162,7 @@ Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></t
     <p>Returns a data frame of all species and how they measure up against the stability criterion</p>
 <dt>code</dt><dd><p>Atlantis Code for species/functional group</p></dd>
 <dt>species</dt><dd><p>The common name of the species/functional group</p></dd>
-<dt>slope</dt><dd><p>Double. The value of the slope parameter (time)</p></dd>
+<dt>mtperyear</dt><dd><p>Double. The value of the slope parameter (year)</p></dd>
 <dt>pValue</dt><dd><p>Double. The p-value associated with the slope parameter (time)</p></dd>
 <dt>pass</dt><dd><p>Logical. Does the species/group pass the test for stability</p></dd>
 
@@ -163,6 +174,7 @@ Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></t
 <p>Formally the following model is fit to the last n years of the run:</p>
 <p>$$biomass_t = \mu + \beta.t + \epsilon_t  where \epsilon_t ~ IID N(0,\sigma^2)$$</p>
 <p>where null hypothesis,  $$H0:\beta=0$$</p>
+<p>Note: annual biomass is used in fitting.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
