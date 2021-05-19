@@ -12,6 +12,7 @@
 #' (Default = NULL, persistence must occur throughout entire time series)
 #'@param floor Numeric scalar. Proportion of initial biomass for which for which all species
 #'are measured against. (Default = 0, all species need to be non zero). Range should be 0-1
+#'@param display Boolean. Flag to indicate whether to return only species that pass the test, fail the test, or all species (Default = NULL)
 #'@param tol Numeric scalar. Tolerance level to add to biomass floor (Default = 1E-6)
 #'@param plot A logical value specifying if the function should generate plots or
 #'not. (Default = F).
@@ -30,6 +31,7 @@
 #'\item{t1}{The first time step persistence was not met}
 #'\item{tn}{The last time step persistence was not met}
 #'\item{nts}{The total number of time steps that persistence was not met}
+#'\item{pass}{Boolean. Indicates if the Atlantis group passed persistence test}
 #'
 #'@export
 #'
@@ -53,7 +55,7 @@
 #'
 #'}
 
-diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor = 0, tol = 1E-6, plot=F){
+diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor = 0, display=NULL, tol = 1E-6, plot=F){
 
   # need in annual units? Or fail when any output timestep below threshold?
   # make safe for migratory species, assume that over the course of the year mean B > 0.
@@ -79,13 +81,12 @@ diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor
     dplyr::select(code,species, time, atoutput) %>%
     dplyr::group_by(code) %>%
     dplyr::mutate(initialBiomass = dplyr::first(atoutput)) %>%
-    dplyr::mutate(proportionInitBio = atoutput/initialBiomass) %>%
-    dplyr::filter(proportionInitBio <= (floor + tol)) %>%
+    dplyr::mutate(proportionInitBio = dplyr::if_else(is.nan(atoutput/initialBiomass),0,atoutput/initialBiomass)) %>%
+    dplyr::mutate(proportionInitBio = as.numeric(trimws(format(round(proportionInitBio,3),nsmall=3)))) %>%
+    #    dplyr::filter(proportionInitBio <= (floor + tol)) %>%
+    dplyr::mutate(pass = proportionInitBio >= (floor + tol)) %>%
     dplyr::ungroup()
 
-  if (nrow(status) == 0) { # all pass species persist at desired levels
-    return(persistence=NULL)
-  }
 
   # num times threshold exceeded, when largest exceedance occurs and value of biomass,
   # range of exceedances
@@ -96,10 +97,21 @@ diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor
     dplyr::mutate(tminimumBiomass = dplyr::case_when(atoutput == min(atoutput) ~ time)) %>%
     dplyr::mutate(t1 = min(time), tn = max(time)) %>%
     dplyr::filter(!is.na(tminimumBiomass)) %>%
-    dplyr::select(code,species,initialBiomass,proportionInitBio, minimumBiomass, tminimumBiomass, t1, tn, nts) %>%
+    dplyr::select(code,species,initialBiomass,proportionInitBio, minimumBiomass, tminimumBiomass, t1, tn, nts,pass) %>%
     dplyr::filter(tminimumBiomass == min(tminimumBiomass)) %>%
     dplyr::ungroup()
 
+  if (is.null(display)) {
+    # return all
+  } else if (display) {
+    # return species that pass
+    persistence <- persistence %>% dplyr::filter(pass==T)
+
+  } else {
+    # return all that fail
+    persistence <- persistence %>% dplyr::filter(pass!=T)
+
+  }
 
 
   return(persistence)
