@@ -8,7 +8,7 @@ diag_persistence(
   modelBiomass,
   speciesCodes = NULL,
   nYrs = NULL,
-  floor = 0,
+  floor = 0.1,
   display = NULL,
   tol = 1e-06,
   plot = F
@@ -25,7 +25,7 @@ Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 (Default = NULL, persistence must occur throughout entire time series)}
 
 \item{floor}{Numeric scalar. Proportion of initial biomass for which for which all species
-are measured against. (Default = 0, all species need to be non zero). Range should be 0-1}
+are measured against. (Default = 0.1, all species need to be above 10\% of initial biomass). Range should be 0-1}
 
 \item{display}{Boolean. Flag to indicate whether to return only species that pass the test, fail the test, or all species (Default = NULL)}
 
