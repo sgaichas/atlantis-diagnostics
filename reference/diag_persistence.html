@@ -121,6 +121,7 @@ used in the test</p>
   speciesCodes <span class='op'>=</span> <span class='cn'>NULL</span>,
   nYrs <span class='op'>=</span> <span class='cn'>NULL</span>,
   floor <span class='op'>=</span> <span class='fl'>0</span>,
+  display <span class='op'>=</span> <span class='cn'>NULL</span>,
   tol <span class='op'>=</span> <span class='fl'>1e-06</span>,
   plot <span class='op'>=</span> <span class='cn'>F</span>
 <span class='op'>)</span></pre>
@@ -149,6 +150,10 @@ Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></t
 are measured against. (Default = 0, all species need to be non zero). Range should be 0-1</p></td>
     </tr>
     <tr>
+      <th>display</th>
+      <td><p>Boolean. Flag to indicate whether to return only species that pass the test, fail the test, or all species (Default = NULL)</p></td>
+    </tr>
+    <tr>
       <th>tol</th>
       <td><p>Numeric scalar. Tolerance level to add to biomass floor (Default = 1E-6)</p></td>
     </tr>
@@ -171,6 +176,7 @@ not. (Default = F).</p></td>
 <dt>t1</dt><dd><p>The first time step persistence was not met</p></dd>
 <dt>tn</dt><dd><p>The last time step persistence was not met</p></dd>
 <dt>nts</dt><dd><p>The total number of time steps that persistence was not met</p></dd>
+<dt>pass</dt><dd><p>Boolean. Indicates if the Atlantis group passed persistence test</p></dd>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
