@@ -21,8 +21,8 @@
 #'\item{code}{Atlantis Code for species/functional group}
 #'\item{species}{The common name of the species/functional group}
 #'\item{t1Biomass}{Value of biomass for first years data used in the fit}
-#'\item{relChange}{Rate of increase relative to \code{t1Biomass}(\code{mtperyear}/\code{t1Biomass})}
-#'\item{mtperyear}{Double. The value of the slope parameter (year) }
+#'\item{relChange}{Rate of increase relative to \code{t1Biomass}(\code{mtPerYear}/\code{t1Biomass})}
+#'\item{mtPerYear}{Double. The value of the slope parameter (year) }
 #'\item{pValue}{Double. The p-value associated with the slope parameter (time)}
 #'\item{pass}{Logical. Does the species/group pass the test for stability}
 #'
@@ -93,11 +93,11 @@ diag_stability <- function(modelBiomass, initialYr = 1964, speciesCodes, nYrs = 
   # then extract slope and significance from model fit
   stability <- stable %>%
     dplyr::mutate(model = purrr::map(data,fitlm)) %>%
-    dplyr::transmute(species,mtperyear = purrr::map_dbl(model,coefs),pValue=purrr::map_dbl(model,pVals)) %>%
+    dplyr::transmute(species,mtPerYear = purrr::map_dbl(model,coefs),pValue=purrr::map_dbl(model,pVals)) %>%
     dplyr::mutate(pass = pValue > sigTest) %>%
     dplyr::ungroup() %>%
-    dplyr::mutate(relChange = mtperyear/t1Biomass) %>%
-    dplyr::mutate(sign = base::sign(mtperyear))
+    dplyr::mutate(relChange = mtPerYear/t1Biomass) %>%
+    dplyr::mutate(sign = base::sign(mtPerYear))
 
   stability <- stability %>%
     dplyr::arrange(pass,desc(abs(relChange)))
