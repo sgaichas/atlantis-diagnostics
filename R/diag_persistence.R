@@ -87,10 +87,11 @@ diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor
     dplyr::mutate(pass = proportionInitBio >= (floor + tol)) %>%
     dplyr::ungroup()
 
-
   # num times threshold exceeded, when largest exceedance occurs and value of biomass,
   # range of exceedances
-  persistence <- status %>%
+
+  persistenceF <- status %>%
+    dplyr::filter(pass == F) %>%
     dplyr::group_by(code) %>%
     dplyr::mutate(minimumBiomass = min(atoutput)) %>%
     dplyr::mutate(nts = dplyr::n()) %>%
@@ -100,6 +101,24 @@ diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor
     dplyr::select(code,species,initialBiomass,proportionInitBio, minimumBiomass, tminimumBiomass, t1, tn, nts,pass) %>%
     dplyr::filter(tminimumBiomass == min(tminimumBiomass)) %>%
     dplyr::ungroup()
+
+  codesFailed <- persistenceF %>%
+    dplyr::pull(code)
+
+  persistenceT <- status %>%
+    dplyr::filter(!(code %in% codesFailed)) %>%
+    dplyr::group_by(code) %>%
+    dplyr::mutate(minimumBiomass = min(atoutput)) %>%
+    dplyr::mutate(nts = 0) %>%
+    dplyr::mutate(tminimumBiomass = dplyr::case_when(atoutput == min(atoutput) ~ time)) %>%
+    dplyr::mutate(t1 = NA, tn = NA) %>%
+    dplyr::filter(!is.na(tminimumBiomass)) %>%
+    dplyr::select(code,species,initialBiomass,proportionInitBio, minimumBiomass, tminimumBiomass, t1, tn, nts,pass) %>%
+    dplyr::filter(tminimumBiomass == min(tminimumBiomass)) %>%
+    dplyr::ungroup()
+
+  persistence <- rbind(persistenceT,persistenceF)
+
 
   if (is.null(display)) {
     # return all
