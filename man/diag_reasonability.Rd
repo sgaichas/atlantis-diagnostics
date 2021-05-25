@@ -51,7 +51,7 @@ Returns a data frame of species
 \item{propInitiBio}{The maxBiomass as a proportion of the inintial biomass}
 \item{propBelowLower}{Magnitude of lower bound excedence as a proportion of lower threshold}
 \item{propAboveUpper}{Magnitude of upper bound excedence as a proportion of upper threshold}
-\item{maxExceedance}{max of \code{propBelowLower} and \code{propBelowLower}}
+\item{maxExceedance}{max of \code{propBelowLower} and \code{propAboveUpper}}
 \item{t1}{The first year reasonableness was not met}
 \item{tn}{The last year reasonableness was not met}
 \item{nts}{The total number of years that reasonableness was not met}
