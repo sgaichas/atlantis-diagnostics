@@ -9,7 +9,7 @@ diag_stability(
   initialYr = 1964,
   speciesCodes,
   nYrs = 20,
-  sigTest = 0.05,
+  relChangeThreshold = 0.01,
   plot = F
 )
 }
@@ -25,7 +25,7 @@ Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 \item{nYrs}{Numeric scalar. Number of years from the end of the time series that stability must occur.
 (Default = 20 years)}
 
-\item{sigTest}{Numeric Scalar. alpha level to use to test for slope significance (Default = 0.05)}
+\item{relChangeThreshold}{Numeric Scalar. Maximum magnitude of relative change of slope (Default = 0.05)}
 
 \item{plot}{Logical. Specifying whether the function should generate plots or not. (Default is F).}
 }
@@ -33,16 +33,15 @@ Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 Returns a data frame of all species and how they measure up against the stability criterion
 \item{code}{Atlantis Code for species/functional group}
 \item{species}{The common name of the species/functional group}
-\item{t1Biomass}{Value of biomass for first years data used in the fit}
-\item{relChange}{Rate of increase relative to \code{t1Biomass}(\code{mtPerYear}/\code{t1Biomass})}
+\item{t1Fit}{Value of fitted biomass for the first of year data used in the fit}
 \item{mtPerYear}{Double. The value of the slope parameter (year) }
-\item{pValue}{Double. The p-value associated with the slope parameter (time)}
+\item{relChange}{Rate of increase relative to \code{t1Fit}(\code{mtPerYear}/\code{t1Fit})}
 \item{pass}{Logical. Does the species/group pass the test for stability}
 }
 \description{
 \code{diag_stability} determines whether the model reaches a steady state
 over the last n years of a run. Stability is loosely defined as a species/groups biomass reaching a
-stable level (measured as having no trend in a defined time range).
+stable level (measured as having tolerable trend in a defined time range).
 }
 \section{Details}{
 

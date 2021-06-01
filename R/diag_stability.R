@@ -2,7 +2,7 @@
 #'
 #'\code{diag_stability} determines whether the model reaches a steady state
 #'over the last n years of a run. Stability is loosely defined as a species/groups biomass reaching a
-#'stable level (measured as having no trend in a defined time range).
+#'stable level (measured as having tolerable trend in a defined time range).
 #'
 #'
 #'@param modelBiomass A data frame. Total biomass of all groups over time, read in from
@@ -12,7 +12,7 @@
 #'(Default = NULL, uses all species found in  \code{modelBiomass})
 #'@param nYrs Numeric scalar. Number of years from the end of the time series that stability must occur.
 #' (Default = 20 years)
-#'@param sigTest Numeric Scalar. alpha level to use to test for slope significance (Default = 0.05)
+#'@param relChangeThreshold Numeric Scalar. Maximum magnitude of relative change of slope (Default = 0.05)
 #'@param plot Logical. Specifying whether the function should generate plots or not. (Default is F).
 #'
 #'@importFrom magrittr %>%
@@ -20,10 +20,9 @@
 #'@return Returns a data frame of all species and how they measure up against the stability criterion
 #'\item{code}{Atlantis Code for species/functional group}
 #'\item{species}{The common name of the species/functional group}
-#'\item{t1Biomass}{Value of biomass for first years data used in the fit}
-#'\item{relChange}{Rate of increase relative to \code{t1Biomass}(\code{mtPerYear}/\code{t1Biomass})}
+#'\item{t1Fit}{Value of fitted biomass for the first of year data used in the fit}
 #'\item{mtPerYear}{Double. The value of the slope parameter (year) }
-#'\item{pValue}{Double. The p-value associated with the slope parameter (time)}
+#'\item{relChange}{Rate of increase relative to \code{t1Fit}(\code{mtPerYear}/\code{t1Fit})}
 #'\item{pass}{Logical. Does the species/group pass the test for stability}
 #'
 #'
@@ -54,10 +53,10 @@
 #'
 #' # Only perform test on herring and white hake.
 #' # Require stability over the last 10 years of the run and and use alpha = 0.1 as tests significance level
-#' diag_stability(modelBiomass, speciesCodes=c("HER","WHK"), nYrs = 10, sigTest = 0.1)
+#' diag_stability(modelBiomass, speciesCodes=c("HER","WHK"), nYrs = 10, relChangeThreshold = 0.01)
 #'}
 
-diag_stability <- function(modelBiomass, initialYr = 1964, speciesCodes, nYrs = 20, sigTest = 0.05, plot=F){
+diag_stability <- function(modelBiomass, initialYr = 1964, speciesCodes, nYrs = 20, relChangeThreshold = 0.01, plot=F){
 
   # check for valid species Codes & clean
   speciesCodes <- check_species_codes(modelBiomass,speciesCodes)
@@ -85,18 +84,21 @@ diag_stability <- function(modelBiomass, initialYr = 1964, speciesCodes, nYrs = 
     dplyr::filter(year > filterTime) %>%
     dplyr::filter(code %in% speciesCodes) %>%
     dplyr::group_by(code,species) %>%
-    dplyr::mutate(t1Biomass = dplyr::first(meanBio)) %>%
-    dplyr::group_by(code,species,t1Biomass) %>%
+    #dplyr::mutate(t1Biomass = dplyr::first(meanBio)) %>%
+    dplyr::group_by(code,species) %>%
     tidyr::nest() # produces a column called data
 
   # fit linear model (biomass = alpha + year.beta) to each species over the time frame specified
   # then extract slope and significance from model fit
+
   stability <- stable %>%
     dplyr::mutate(model = purrr::map(data,fitlm)) %>%
-    dplyr::transmute(species,mtPerYear = purrr::map_dbl(model,coefs),pValue=purrr::map_dbl(model,pVals)) %>%
-    dplyr::mutate(pass = pValue > sigTest) %>%
+    #dplyr::transmute(species,mtPerYear = purrr::map_dbl(model,coefs),pValue=purrr::map_dbl(model,pVals)) %>%
+    dplyr::transmute(species,t1Fit = purrr::map_dbl(model,fittedVal),mtPerYear = purrr::map_dbl(model,coefs)) %>%
+    #dplyr::mutate(pass = pValue > sigTest) %>%
     dplyr::ungroup() %>%
-    dplyr::mutate(relChange = mtPerYear/t1Biomass) %>%
+    dplyr::mutate(relChange = mtPerYear/t1Fit) %>%
+    dplyr::mutate(pass = abs(relChange) < relChangeThreshold) %>%
     dplyr::mutate(sign = base::sign(mtPerYear))
 
   stability <- stability %>%
@@ -123,6 +125,11 @@ fitlm <- function(df){
   lm(meanBio ~ year, data=df)
 }
 
+fittedVal <- function(model) {
+  # first fitted value
+  fitted.values(model)[[1]]
+
+}
 
 
 
