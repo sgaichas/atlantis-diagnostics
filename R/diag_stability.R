@@ -23,6 +23,7 @@
 #'\item{t1Fit}{Value of fitted biomass for the first of year data used in the fit}
 #'\item{mtPerYear}{Double. The value of the slope parameter (year) }
 #'\item{relChange}{Rate of increase relative to \code{t1Fit}(\code{mtPerYear}/\code{t1Fit})}
+#'\item{aveBio}{mean biomass for the last \code{nYrs} years }
 #'\item{pass}{Logical. Does the species/group pass the test for stability}
 #'
 #'
@@ -34,7 +35,8 @@
 #'
 #' where null hypothesis,  \deqn{H0:\beta=0}
 #'
-#' Note: annual biomass is used in fitting.
+#' Note: annual biomass is used in fitting. Species with mean annual biomass < 1 metric ton over the last
+#' n years of the run are not considered stable. They are reported to Fail the test and NaNs returned
 #'
 #'@export
 #'
@@ -69,7 +71,7 @@ diag_stability <- function(modelBiomass, initialYr = 1964, speciesCodes, nYrs = 
     dplyr::rename(value=atoutput) %>%
     dplyr::mutate(yearStep= floor(time/365)) %>%
     dplyr::group_by(code,yearStep,species) %>%
-    dplyr::summarise(meanBio = mean(value),.groups="drop") %>%
+    dplyr::summarise(meanBio = mean(value),.groups="drop") %>% # average over year, removes seasonal cycle
     dplyr::mutate(year = yearStep+initialYr,yearStep=NULL) %>%
     dplyr::ungroup()
 
@@ -94,12 +96,21 @@ diag_stability <- function(modelBiomass, initialYr = 1964, speciesCodes, nYrs = 
   stability <- stable %>%
     dplyr::mutate(model = purrr::map(data,fitlm)) %>%
     #dplyr::transmute(species,mtPerYear = purrr::map_dbl(model,coefs),pValue=purrr::map_dbl(model,pVals)) %>%
-    dplyr::transmute(species,t1Fit = purrr::map_dbl(model,fittedVal),mtPerYear = purrr::map_dbl(model,coefs)) %>%
+    dplyr::transmute(species,t1Fit = purrr::map_dbl(model,fittedVal),
+                     mtPerYear = purrr::map_dbl(model,coefs),
+                     aveBio = purrr::map_dbl(data,meanData)) %>%
     #dplyr::mutate(pass = pValue > sigTest) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(relChange = mtPerYear/t1Fit) %>%
+    dplyr::mutate(sign = base::sign(mtPerYear)) %>%
     dplyr::mutate(pass = abs(relChange) < relChangeThreshold) %>%
-    dplyr::mutate(sign = base::sign(mtPerYear))
+    # average biomass < 1 metric ton
+    dplyr::mutate(pass = dplyr::if_else(aveBio < 1,F,pass)) %>%
+    dplyr::mutate(sign = dplyr::if_else(aveBio < 1,NaN,sign)) %>%
+    dplyr::mutate(relChange = dplyr::if_else(aveBio < 1,NaN,relChange)) %>%
+    dplyr::mutate(t1Fit = dplyr::if_else(aveBio < 1,NaN,t1Fit)) %>%
+    dplyr::mutate(mtPerYear = dplyr::if_else(aveBio < 1,NaN,mtPerYear))
+
 
   stability <- stability %>%
     dplyr::arrange(pass,desc(abs(relChange)))
@@ -128,7 +139,10 @@ fitlm <- function(df){
 fittedVal <- function(model) {
   # first fitted value
   fitted.values(model)[[1]]
+}
 
+meanData <- function(df){
+  mean(df$meanBio)
 }
 
 

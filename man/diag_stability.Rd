@@ -36,6 +36,7 @@ Returns a data frame of all species and how they measure up against the stabilit
 \item{t1Fit}{Value of fitted biomass for the first of year data used in the fit}
 \item{mtPerYear}{Double. The value of the slope parameter (year) }
 \item{relChange}{Rate of increase relative to \code{t1Fit}(\code{mtPerYear}/\code{t1Fit})}
+\item{aveBio}{mean biomass for the last \code{nYrs} years }
 \item{pass}{Logical. Does the species/group pass the test for stability}
 }
 \description{
@@ -52,7 +53,8 @@ Formally the following model is fit to the last n years of the run:
 
 where null hypothesis,  \deqn{H0:\beta=0}
 
-Note: annual biomass is used in fitting.
+Note: annual biomass is used in fitting. Species with mean annual biomass < 1 metric ton over the last
+n years of the run are not considered stable. They are reported to Fail the test and NaNs returned
 }
 
 \examples{
@@ -69,6 +71,6 @@ diag_stability(modelBiomass, nYrs = 20)
 
 # Only perform test on herring and white hake.
 # Require stability over the last 10 years of the run and and use alpha = 0.1 as tests significance level
-diag_stability(modelBiomass, speciesCodes=c("HER","WHK"), nYrs = 10, sigTest = 0.1)
+diag_stability(modelBiomass, speciesCodes=c("HER","WHK"), nYrs = 10, relChangeThreshold = 0.01)
 }
 }
