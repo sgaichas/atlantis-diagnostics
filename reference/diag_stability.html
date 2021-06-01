@@ -42,7 +42,7 @@
 <meta property="og:title" content="Test for functional group stability — diag_stability" />
 <meta property="og:description" content="diag_stability determines whether the model reaches a steady state
 over the last n years of a run. Stability is loosely defined as a species/groups biomass reaching a
-stable level (measured as having no trend in a defined time range)." />
+stable level (measured as having tolerable trend in a defined time range)." />
 
 
 
@@ -113,7 +113,7 @@ stable level (measured as having no trend in a defined time range)." />
     <div class="ref-description">
     <p><code>diag_stability</code> determines whether the model reaches a steady state
 over the last n years of a run. Stability is loosely defined as a species/groups biomass reaching a
-stable level (measured as having no trend in a defined time range).</p>
+stable level (measured as having tolerable trend in a defined time range).</p>
     </div>
 
     <pre class="usage"><span class='fu'>diag_stability</span><span class='op'>(</span>
@@ -121,7 +121,7 @@ stable level (measured as having no trend in a defined time range).</p>
   initialYr <span class='op'>=</span> <span class='fl'>1964</span>,
   <span class='va'>speciesCodes</span>,
   nYrs <span class='op'>=</span> <span class='fl'>20</span>,
-  sigTest <span class='op'>=</span> <span class='fl'>0.05</span>,
+  relChangeThreshold <span class='op'>=</span> <span class='fl'>0.01</span>,
   plot <span class='op'>=</span> <span class='cn'>F</span>
 <span class='op'>)</span></pre>
 
@@ -148,8 +148,8 @@ Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></t
 (Default = 20 years)</p></td>
     </tr>
     <tr>
-      <th>sigTest</th>
-      <td><p>Numeric Scalar. alpha level to use to test for slope significance (Default = 0.05)</p></td>
+      <th>relChangeThreshold</th>
+      <td><p>Numeric Scalar. Maximum magnitude of relative change of slope (Default = 0.05)</p></td>
     </tr>
     <tr>
       <th>plot</th>
@@ -162,10 +162,9 @@ Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></t
     <p>Returns a data frame of all species and how they measure up against the stability criterion</p>
 <dt>code</dt><dd><p>Atlantis Code for species/functional group</p></dd>
 <dt>species</dt><dd><p>The common name of the species/functional group</p></dd>
-<dt>t1Biomass</dt><dd><p>Value of biomass for first years data used in the fit</p></dd>
-<dt>relChange</dt><dd><p>Rate of increase relative to <code>t1Biomass</code>(<code>mtPerYear</code>/<code>t1Biomass</code>)</p></dd>
+<dt>t1Fit</dt><dd><p>Value of fitted biomass for the first of year data used in the fit</p></dd>
 <dt>mtPerYear</dt><dd><p>Double. The value of the slope parameter (year)</p></dd>
-<dt>pValue</dt><dd><p>Double. The p-value associated with the slope parameter (time)</p></dd>
+<dt>relChange</dt><dd><p>Rate of increase relative to <code>t1Fit</code>(<code>mtPerYear</code>/<code>t1Fit</code>)</p></dd>
 <dt>pass</dt><dd><p>Logical. Does the species/group pass the test for stability</p></dd>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
