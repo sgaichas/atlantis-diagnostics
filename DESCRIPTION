@@ -5,8 +5,7 @@ Authors@R:
     c(person(given = "Sarah",
            family = "Gaichas",
            role = c("aut", "cre"),
-           email = "Sarah.Gaichas@noaa.gov",
-           comment = c(ORCID = "YOUR-ORCID-ID")),
+           email = "Sarah.Gaichas@noaa.gov"),
     person(given = "Andy",
            family = "Beet",
            role = c("aut"),
@@ -15,27 +14,24 @@ Authors@R:
     person(given = "Joeseph",
            family = "Caracappa",
            role = c("aut"),
-           email = "joseph.caracappa@noaa.gov",
-           comment = c(ORCID = "YOUR-ORCID-ID")),
+           email = "joseph.caracappa@noaa.gov"),
     person(given = "Robert",
            family = "Gamble",
            role = c("aut"),
-           email = "Robert.Gamble@noaa.gov",
-           comment = c(ORCID = "YOUR-ORCID-ID")),
+           email = "Robert.Gamble@noaa.gov"),
     person(given = "Scott",
            family = "Large",
            role = c("aut"),
-           email = "Scott.Large.gov",
-           comment = c(ORCID = "YOUR-ORCID-ID")))
+           email = "Scott.Large.gov"))
 Description: Atlantis diagnostics functions in this package are used to determine whether the model 
     is meeting defined performance and review criteria, including persistence of all functional groups,
-    biomass stability for the last ~20 years of an unfished, unperturbed 80-100 year run, species groups 
+    biomass stability for the last ~20 years of a run, species groups 
     totaling ~80% of system biomass qualitatively matching known biomass trends, patterns of temporal 
     variability are captured, productivity for groups totaling ~80% of system biomass qualitatively 
     matching FMSY or life history expectations, natural mortality decreasing with age for most groups,
     age and length structure qualitatively matching expectations for majority of groups, and predicted
     diet qualitatively matching empirical diet comp for majority of groups.
-License: CC0
+License: file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
