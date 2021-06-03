@@ -35,6 +35,7 @@
 #'
 #'@export
 #'
+#'@family diags
 #'
 #'@examples
 #'\dontrun{

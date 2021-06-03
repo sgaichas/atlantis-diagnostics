@@ -74,3 +74,9 @@ diag_stability(modelBiomass, nYrs = 20)
 diag_stability(modelBiomass, speciesCodes=c("HER","WHK"), nYrs = 10, relChangeThreshold = 0.01)
 }
 }
+\seealso{
+Other diags: 
+\code{\link{diag_persistence}()},
+\code{\link{diag_reasonability}()}
+}
+\concept{diags}

@@ -38,6 +38,9 @@
 #' Note: annual biomass is used in fitting. Species with mean annual biomass < 1 metric ton over the last
 #' n years of the run are not considered stable. They are reported to Fail the test and NaNs returned
 #'
+#'
+#'@family diags
+#'
 #'@export
 #'
 #'
