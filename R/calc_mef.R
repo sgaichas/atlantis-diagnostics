@@ -9,6 +9,7 @@
 #'\item{mef}{model efficiency value: Range from -Inf to 1}
 #'\item{n}{number of observations used to calculate mef}
 #'
+#'@noRd
 
 
 

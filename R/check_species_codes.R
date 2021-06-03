@@ -6,6 +6,8 @@
 #' @param speciesCodes Character vector. Vector of species Codes to verify against complete list
 #'
 #' @return Vector of valid Codes
+#'
+#' @noRd
 
 check_species_codes <- function(modelBiomass,speciesCodes){
 
