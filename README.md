@@ -5,8 +5,41 @@
 ![gitleaks](https://github.com/NOAA-EDAB/atlantisdiagnostics/workflows/gitleaks/badge.svg)
 
 <!-- badges: end -->
+In development.
 
-Atlantis model performance diagnostics outlined in Kaplan and Marshall 2016
+Atlantis model performance diagnostics guided by Kaplan and Marshall<sup>1</sup>, 2016
+
+## Installation
+
+``` r
+remotes::install_github("NOAA-EDAB/atlantisdiagnostics")
+```
+
+## Usage
+
+The diagnostics package primarily focuses on three properties of an Atlantis model. These are loosely defined as persistence, stability, and reasonability.
+
+* Persistence: Do all species/groups in the model persist through a set period of time,
+* Stability: Do all species/groups reach an acceptable steady state or equilibrium?
+* Reasonability: Do all species/groups population biomass lie within reasonable bounds?
+
+
+<sup>1</sup> [A guinea pig's tale](https://doi.org/10.1093/icesjms/fsw047): learning to review end-to-end marine ecosystem models for management application. ICES Journal of Marine Science (2016) 73(7), 1715-1724
+
+
+## Contact
+
+| [andybeet](https://github.com/andybeet)                                                         |
+|-------------------------------------------------------------------------------------------------|
+| [![](https://avatars1.githubusercontent.com/u/22455149?s=100&v=4)](https://github.com/andybeet) |
+
+## Contributors (alphabetical order)
+
+| [jcaracappa1](https://github.com/jcaracappa1)                                                      | [sgaichas](https://github.com/sgaichas)                                                        | [gambler1650](https://github.com/gambler1650)                                                     | [slarge](https://github.com/slarge)                                                          |
+|----------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| [![](https://avatars1.githubusercontent.com/u/57966543?s=100&v=4)](https://github.com/jcaracappa1) | [![](https://avatars1.githubusercontent.com/u/8172302?s=100&v=4)](https://github.com/sgaichas) | [![](https://avatars1.githubusercontent.com/u/5949383?s=100&v=4)](https://github.com/gambler1650) | [![](https://avatars1.githubusercontent.com/u/5000131?s=100&v=4)](https://github.com/slarge) |
+
+
 
 #### Legal disclaimer
 
