@@ -4,11 +4,11 @@ Version: 0.0.0.9000
 Authors@R: 
     c(person(given = "Sarah",
            family = "Gaichas",
-           role = c("aut", "cre"),
+           role = c("aut"),
            email = "Sarah.Gaichas@noaa.gov"),
     person(given = "Andy",
            family = "Beet",
-           role = c("aut"),
+           role = c("aut", "cre"),
            email = "andrew.beet@noaa.gov",
            comment = c(ORCID = "0000-0001-8270-7090")),
     person(given = "Joeseph",
