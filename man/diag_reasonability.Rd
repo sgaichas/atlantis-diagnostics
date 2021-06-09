@@ -93,7 +93,6 @@ surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 }
 \seealso{
 Other diags: 
-\code{\link{diag_persistence}()},
 \code{\link{diag_stability}()}
 }
 \concept{diags}

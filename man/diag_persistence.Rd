@@ -72,9 +72,3 @@ diag_persistence(modlBiomass, speciesCodes="HER", nYrs = 10, floor = 0.1)
 
 }
 }
-\seealso{
-Other diags: 
-\code{\link{diag_reasonability}()},
-\code{\link{diag_stability}()}
-}
-\concept{diags}

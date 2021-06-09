@@ -35,7 +35,6 @@
 #'
 #'@export
 #'
-#'@family diags
 #'
 #'@examples
 #'\dontrun{
@@ -77,11 +76,11 @@ diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor
   # For each species calculate which time steps biomass is below persistence threshold
   # we look at biomass < % initial Biomass
   status <- modelBiomass %>%
-    dplyr::filter(time >= filterTime) %>%
     dplyr::filter(code %in% speciesCodes) %>%
     dplyr::select(code,species, time, atoutput) %>%
     dplyr::group_by(code) %>%
     dplyr::mutate(initialBiomass = dplyr::first(atoutput)) %>%
+    dplyr::filter(time >= filterTime) %>%
     dplyr::mutate(proportionInitBio = dplyr::if_else(is.nan(atoutput/initialBiomass),0,atoutput/initialBiomass)) %>%
     dplyr::mutate(proportionInitBio = as.numeric(trimws(format(round(proportionInitBio,3),nsmall=3)))) %>%
     #    dplyr::filter(proportionInitBio <= (floor + tol)) %>%
