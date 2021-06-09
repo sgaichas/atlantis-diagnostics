@@ -19,7 +19,7 @@ remotes::install_github("NOAA-EDAB/atlantisdiagnostics")
 
 The diagnostics package primarily focuses on three properties of an Atlantis model. These are loosely defined as persistence, stability, and reasonability.
 
-* Persistence: Do all species/groups in the model persist through a set period of time,
+* Persistence: Do all species/groups in the model persist through a set period of time?
 * Stability: Do all species/groups reach an acceptable steady state or equilibrium?
 * Reasonability: Do all species/groups population biomass lie within reasonable bounds?
 
