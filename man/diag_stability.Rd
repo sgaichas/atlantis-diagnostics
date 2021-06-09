@@ -25,7 +25,7 @@ Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
 \item{nYrs}{Numeric scalar. Number of years from the end of the time series that stability must occur.
 (Default = 20 years)}
 
-\item{relChangeThreshold}{Numeric Scalar. Maximum magnitude of relative change of slope (Default = 0.05)}
+\item{relChangeThreshold}{Numeric Scalar. Maximum magnitude of relative change of slope (Default = 0.01)}
 
 \item{plot}{Logical. Specifying whether the function should generate plots or not. (Default is F).}
 }
@@ -76,7 +76,6 @@ diag_stability(modelBiomass, speciesCodes=c("HER","WHK"), nYrs = 10, relChangeTh
 }
 \seealso{
 Other diags: 
-\code{\link{diag_persistence}()},
 \code{\link{diag_reasonability}()}
 }
 \concept{diags}

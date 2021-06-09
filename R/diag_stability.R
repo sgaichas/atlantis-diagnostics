@@ -12,7 +12,7 @@
 #'(Default = NULL, uses all species found in  \code{modelBiomass})
 #'@param nYrs Numeric scalar. Number of years from the end of the time series that stability must occur.
 #' (Default = 20 years)
-#'@param relChangeThreshold Numeric Scalar. Maximum magnitude of relative change of slope (Default = 0.05)
+#'@param relChangeThreshold Numeric Scalar. Maximum magnitude of relative change of slope (Default = 0.01)
 #'@param plot Logical. Specifying whether the function should generate plots or not. (Default is F).
 #'
 #'@importFrom magrittr %>%
