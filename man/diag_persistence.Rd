@@ -67,7 +67,7 @@ modelBiomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
 diag_persistence(modelBiomass,speciesCodes=NULL, nYrs = NULL, floor = 0)
 
 # only evaluate herring. Require stability over the last 10 years of the run and all values should
-exceed 10\% of initial biomass
+# exceed 10\% of initial biomass
 diag_persistence(modlBiomass, speciesCodes="HER", nYrs = 10, floor = 0.1)
 
 }
