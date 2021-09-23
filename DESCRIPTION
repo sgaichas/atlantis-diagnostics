@@ -43,8 +43,10 @@ Imports:
     ggthemes,
     ggforce,
     purrr,
-    tidyr
+    tidyr,
+    atlantistools
 Remotes:
+    andybeet/atlantistools,
     r4atlantis/atlantisom,
     NOAA-EDAB/atlantisdrive
 Roxygen: list(markdown = TRUE)
