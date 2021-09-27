@@ -1,15 +1,17 @@
 #' Test for max fish size
 #'
 #' Calculate average size of fish through time and check to see if any fish exceed the
-#' reported largest size.
+#' user supplied observed maximum size.
 #'
-#'@param atlDir A character string. Path to location of model run output files.
-#'@param runPrefix A character string. Prefix added to all atlantis output files.
+#'@param nc A character string. Path to location of model run output files.
+#'@param bgm A character string. Prefix added to all atlantis output files.
+#'@param init A character string. Prefix added to all atlantis output files.
+#'@param fgs A character string. Prefix added to all atlantis output files.
+#'@param prm_run A character string. Prefix added to all atlantis output files.
+#'@param prm_biol A character string. Prefix added to all atlantis output files.#'
 #'@param speciesStats Data frame.
 #'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for persistence.
 #'(Default = NULL, uses all species)
-#'@param nYrs Numeric scalar. Number of years from the end of the time series that persistence must occur.
-#' (Default = NULL, persistence must occur throughout entire time series)
 #'
 #'@importFrom magrittr %>%
 #'@importFrom rlang .data
@@ -20,7 +22,7 @@
 #'\item{species}{The common name of the species/functional group}
 #'\item{code}{Atlantis Code for species/functional group}
 #'
-#'@noRd
+#'@export
 #'
 #'
 #'@examples
@@ -28,125 +30,99 @@
 #'
 #'}
 
-diag_maxsize <- function(atlDir,runPrefix,speciesStats,speciesCodes=NULL, nYrs = NULL){
 
-  # look for AnnualAgeBiomassIndx.txt and AnnualAgeNumbersInd.txt in output folder
-  biomassFile <- paste0(atlDir,runPrefix,"AnnualAgeBiomIndx.txt")
-  ageFile <- paste0(atlDir,runPrefix,"AnnualAgeNumbersIndx.txt")
-  if (!file.exists(biomassFile)) {
-    stop(paste("Can't find Biomass file - ",biomassFile))
-  }
-  if (!file.exists(ageFile)) {
-    stop(paste("Can't find age file - ",ageFile))
-  }
+diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCodes = NULL){
 
-  biomData <- atlantistools::load_txt(biomassFile) %>%
-    atlantistools::preprocess_txt(.,into = "code",removeZeros=F) %>%
-    dplyr::filter(code %in% speciesCodes) %>%
-    dplyr::rename(biomass = .data$atoutput)
-
-  ageData <- atlantistools::load_txt(ageFile) %>%
-    atlantistools::preprocess_txt(.,into = "code",removeZeros=F) %>%
-    dplyr::filter(.data$code %in% speciesCodes) %>%
-    dplyr::rename(age = .data$atoutput)
+  #Get boundary box
+  bboxes =  atlantistools::get_boundary(boxinfo = atlantistools::load_box(bgm))
+  #Get epibenthic biopool groups
+  bio.pools = atlantistools::load_bps(fgs,init)
+  #Read in box properties
+  vol.dz = atlantistools::load_nc_physics(nc = nc,
+                                          select_physics = c('volume','dz'),
+                                          prm_run = prm_run,
+                                          bboxes = bboxes)
+  #Get biomass conversion scalar
+  bio.conv = atlantistools::get_conv_mgnbiot(prm_biol)
 
 
-  joinData <- dplyr::left_join(biomData,ageData,by = c("time","code")) %>%
-    dplyr::mutate(meanWeight=.data$biomass/.data$age) %>%
-    dplyr::group_by(code) %>%
-    dplyr::summarise(maxMeanWeight = max(meanWeight))
+  speciesLookup <- atlantistools::load_fgs(fgs) %>%
+    dplyr::select(.data$LongName, .data$Code) %>%
+    tibble::as_tibble()
 
-  # filter by speciesCodes
+  # get group names
+  group.names = atlantistools::get_groups(fgs)
+  # get age groups - 10 cohorts
+  groups.age = atlantistools::get_age_groups(fgs)
+  # get groups not with 10 cohorts
+  groups.bp = group.names[!group.names %in% groups.age]
 
-  # then by data availability
+  # list of variables ot pull from main nc file.
+  # Needed for biomass calculation. Each variable resides in list element
+  vars = list('Nums','StructN','ResN','N')
+  group.types = list(groups.age,groups.age,groups.age,groups.bp)
+  rawdata.main = Map(atlantistools::load_nc,
+                     select_variable = vars,
+                     select_groups = group.types,
+                     MoreArgs = list(nc = nc,
+                                     bps = bio.pools,
+                                     fgs = fgs,
+                                     prm_run = prm_run,
+                                     bboxes = bboxes ))
 
-  # compare to stats
+  # calculate biomass for species,age, polygon, layer, time
+  spatial.biomass = atlantistools::calculate_biomass_spatial(nums = rawdata.main[[1]],
+                                                             sn = rawdata.main[[2]],
+                                                             rn = rawdata.main[[3]],
+                                                             n = rawdata.main[[4]],
+                                                             vol_dz = vol.dz,
+                                                             bio_conv = bio.conv,
+                                                             bps = bio.pools)
+  # grab numbers in time and space
+  spatialNumbers = rawdata.main[[1]] %>%
+    dplyr::rename(numbers = atoutput)
+  # filter biomass for species with 10 cohorts and convert to kilograms
+  spatialBiomass <- spatial.biomass %>%
+    dplyr::filter(.data$species %in% unique(spatialNumbers$species)) %>%
+    dplyr::rename(biomass = .data$atoutput) %>%
+    dplyr::mutate(biomass = 1E6*.data$biomass)
 
-  # report diagnostic for species have max
-  # report largest size of all
-  # report no data for others
+  # join numbers with biomass and calculate mean weight of an individivual in age, polygon, layer, time
+  jj <- spatialNumbers %>% dplyr::left_join(.,spatialBiomass,by = c("species", "agecl", "polygon", "layer", "time")) %>%
+    dplyr::filter(!is.na(.data$biomass)) %>%
+    dplyr::mutate(meanWeight = .data$biomass/.data$numbers)
 
-  return()
-
-}
-
-
-
-
-  # find final time step value
-  maxRuntime <- max(modelBiomass$time)
-
-  # check for valid species Codes & clean
-  speciesCodes <- check_species_codes(modelBiomass,speciesCodes)
-
-  if (is.null(nYrs)) { # use all time series
-    filterTime <- 0
-  } else { # last n years
-    filterTime <- maxRuntime - (365*nYrs)
-  }
-
-  # For each species calculate which time steps biomass is below persistence threshold
-  # we look at biomass < % initial Biomass
-  status <- modelBiomass %>%
-    dplyr::filter(code %in% speciesCodes) %>%
-    dplyr::select(code,species, time, atoutput) %>%
-    dplyr::group_by(code) %>%
-    dplyr::mutate(initialBiomass = dplyr::first(atoutput)) %>%
-    dplyr::filter(time >= filterTime) %>%
-    dplyr::mutate(proportionInitBio = dplyr::if_else(is.nan(atoutput/initialBiomass),0,atoutput/initialBiomass)) %>%
-    dplyr::mutate(proportionInitBio = as.numeric(trimws(format(round(proportionInitBio,3),nsmall=3)))) %>%
-    #    dplyr::filter(proportionInitBio <= (floor + tol)) %>%
-    dplyr::mutate(pass = proportionInitBio >= (floor + tol)) %>%
-    dplyr::ungroup()
-
-  # num times threshold exceeded, when largest exceedance occurs and value of biomass,
-  # range of exceedances
-
-  persistenceF <- status %>%
-    dplyr::filter(pass == F) %>%
-    dplyr::group_by(code) %>%
-    dplyr::mutate(minimumBiomass = min(atoutput)) %>%
-    dplyr::mutate(nts = dplyr::n()) %>%
-    dplyr::mutate(tminimumBiomass = dplyr::case_when(atoutput == min(atoutput) ~ time)) %>%
-    dplyr::mutate(t1 = min(time), tn = max(time)) %>%
-    dplyr::filter(!is.na(tminimumBiomass)) %>%
-    dplyr::select(code,species,initialBiomass,proportionInitBio, minimumBiomass, tminimumBiomass, t1, tn, nts,pass) %>%
-    dplyr::filter(tminimumBiomass == min(tminimumBiomass)) %>%
-    dplyr::ungroup()
-
-  codesFailed <- persistenceF %>%
-    dplyr::pull(code)
-
-  persistenceT <- status %>%
-    dplyr::filter(!(code %in% codesFailed)) %>%
-    dplyr::group_by(code) %>%
-    dplyr::mutate(minimumBiomass = min(atoutput)) %>%
-    dplyr::mutate(nts = 0) %>%
-    dplyr::mutate(tminimumBiomass = dplyr::case_when(atoutput == min(atoutput) ~ time)) %>%
-    dplyr::mutate(t1 = NA, tn = NA) %>%
-    dplyr::filter(!is.na(tminimumBiomass)) %>%
-    dplyr::select(code,species,initialBiomass,proportionInitBio, minimumBiomass, tminimumBiomass, t1, tn, nts,pass) %>%
-    dplyr::filter(tminimumBiomass == min(tminimumBiomass)) %>%
-    dplyr::ungroup()
-
-  persistence <- rbind(persistenceT,persistenceF)
+  # select time and spac where max occurs
+  boxlayer <- jj %>% dplyr::group_by(.data$species,.data$polygon, .data$time) %>%
+    dplyr::summarise(maxMeanWeight = max(.data$meanWeight),.groups="drop")
+  maxVal <- boxlayer %>%
+    dplyr::group_by(.data$species) %>%
+    dplyr::summarise(maxVal = max(.data$maxMeanWeight),.groups="drop")
+  boxlayer <- boxlayer %>%
+    dplyr::left_join(.,maxVal,by = "species") %>%
+    dplyr::filter(maxMeanWeight == .data$maxVal) %>%
+    dplyr::select(-.data$maxVal)
 
 
-  if (is.null(display)) {
-    # return all
-  } else if (display) {
-    # return species that pass
-    persistence <- persistence %>% dplyr::filter(pass==T)
+  # find the maximum weight for each species compare to large fish values from speciesStats
+  largeFish <- boxlayer %>%
+    dplyr::left_join(.,speciesLookup,by=c("species"="LongName")) %>%
+    dplyr::left_join(.,speciesStats,by = c("Code"="code")) %>%
+    dplyr::mutate(pass = ifelse(.data$maxMeanWeight<.data$maxObsWeight,TRUE,FALSE)) %>%
+    dplyr::arrange(.data$pass)  %>%
+    dplyr::select(-.data$scientificName,-.data$Common_Name) %>%
+    dplyr::relocate(.data$Code,.after = .data$species) %>%
+    dplyr::relocate(.data$maxMeanWeight, .before = .data$maxObsWeight) %>%
+    dplyr::mutate(ratio = .data$maxMeanWeight/.data$maxObsWeight)
 
-  } else {
-    # return all that fail
-    persistence <- persistence %>% dplyr::filter(pass!=T)
-
+  # filter codes supplies by user
+  if(!is.null(speciesCodes)) {
+    largeFish <- largeFish %>%
+      dplyr::filter(Code %in% speciesCodes)
   }
 
-  persistence <- persistence %>%
-    dplyr::arrange(pass,proportionInitBio)
 
-  return(persistence)
+
+  return(largeFish)
 
 }

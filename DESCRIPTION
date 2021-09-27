@@ -50,4 +50,4 @@ Remotes:
     r4atlantis/atlantisom,
     NOAA-EDAB/atlantisdrive
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
