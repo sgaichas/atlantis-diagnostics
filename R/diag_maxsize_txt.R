@@ -28,7 +28,7 @@
 #'
 #'}
 
-diag_maxsize <- function(atlDir,runPrefix,speciesStats,speciesCodes=NULL, nYrs = NULL){
+diag_maxsize_txt <- function(atlDir,runPrefix,speciesStats,speciesCodes=NULL, nYrs = NULL){
 
   # look for AnnualAgeBiomassIndx.txt and AnnualAgeNumbersInd.txt in output folder
   biomassFile <- paste0(atlDir,runPrefix,"AnnualAgeBiomIndx.txt")
