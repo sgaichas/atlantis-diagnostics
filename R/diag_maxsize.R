@@ -93,7 +93,7 @@ diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCo
     dplyr::mutate(meanWeight = .data$biomass/.data$numbers)
 
   # select time and spac where max occurs
-  boxlayer <- jj %>% dplyr::group_by(.data$species,.data$polygon, .data$time) %>%
+  boxlayer <- jj %>% dplyr::group_by(.data$species,.data$polygon,.data$agecl, .data$time) %>%
     dplyr::summarise(maxMeanWeight = max(.data$meanWeight),.groups="drop")
   maxVal <- boxlayer %>%
     dplyr::group_by(.data$species) %>%
