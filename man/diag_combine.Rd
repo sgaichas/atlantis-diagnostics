@@ -22,7 +22,6 @@ A data frame
 \item{stability}{Indicating pass or failure of stability test}
 \item{relChange}{Metric for stability. Rate of increase relative to \code{t1Biomass}(\code{mtperyear}/\code{t1Biomass}). see \code{\url{diag_stability}} }
 \item{reasonability}{Indicating pass or failure of reasonability test}
-\item{}{}
 }
 \description{
 Using the output from all tests (persistence, stability, reasonability), they are combined
