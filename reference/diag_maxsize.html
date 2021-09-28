@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • atlantisdiagnostics</title>
+<title>Test for max fish size — diag_maxsize • atlantisdiagnostics</title>
 
 
 <!-- jquery -->
@@ -41,7 +41,9 @@
   <link href="../extra.css" rel="stylesheet">
   
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Test for max fish size — diag_maxsize" />
+<meta property="og:description" content="Calculate average size of fish through time and check to see if any fish exceed the
+user supplied observed maximum size." />
 
 
 
@@ -60,7 +62,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -107,66 +109,80 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Test for max fish size</h1>
+    <small class="dont-index">Source: <a href='https://github.com/NOAA-EDAB/atlantisdiagnostics/blob/master/R/diag_maxsize.R'><code>R/diag_maxsize.R</code></a></small>
+    <div class="hidden name"><code>diag_maxsize.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Calculate average size of fish through time and check to see if any fish exceed the
+user supplied observed maximum size.</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>diag_maxsize</span><span class='op'>(</span>
+  <span class='va'>nc</span>,
+  <span class='va'>bgm</span>,
+  <span class='va'>init</span>,
+  <span class='va'>fgs</span>,
+  <span class='va'>prm_run</span>,
+  <span class='va'>prm_biol</span>,
+  <span class='va'>speciesStats</span>,
+  speciesCodes <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="diag_combine.html">diag_combine()</a></code> </p>
-        </td>
-        <td><p>Combine all diagnostic output</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="diag_maxsize.html">diag_maxsize()</a></code> </p>
-        </td>
-        <td><p>Test for max fish size</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="diag_persistence.html">diag_persistence()</a></code> </p>
-        </td>
-        <td><p>Test for functional group persistence</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="diag_reasonability.html">diag_reasonability()</a></code> </p>
-        </td>
-        <td><p>Test for functional group reasonability</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="diag_stability.html">diag_stability()</a></code> </p>
-        </td>
-        <td><p>Test for functional group stability</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>nc</th>
+      <td><p>A character string. Path to location of model run output files.</p></td>
+    </tr>
+    <tr>
+      <th>bgm</th>
+      <td><p>A character string. Prefix added to all atlantis output files.</p></td>
+    </tr>
+    <tr>
+      <th>init</th>
+      <td><p>A character string. Prefix added to all atlantis output files.</p></td>
+    </tr>
+    <tr>
+      <th>fgs</th>
+      <td><p>A character string. Prefix added to all atlantis output files.</p></td>
+    </tr>
+    <tr>
+      <th>prm_run</th>
+      <td><p>A character string. Prefix added to all atlantis output files.</p></td>
+    </tr>
+    <tr>
+      <th>prm_biol</th>
+      <td><p>A character string. Prefix added to all atlantis output files.#'</p></td>
+    </tr>
+    <tr>
+      <th>speciesStats</th>
+      <td><p>Data frame.</p></td>
+    </tr>
+    <tr>
+      <th>speciesCodes</th>
+      <td><p>Character vector. A vector of Atlantis species codes in which to test for persistence.
+(Default = NULL, uses all species)</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>Returns a data frame of species which do not meet defined max size criterion.</p>
+<dt>species</dt><dd><p>The common name of the species/functional group</p></dd>
+<dt>code</dt><dd><p>Atlantis Code for species/functional group</p></dd>
+
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+
+<span class='op'>}</span>
+</div></pre>
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
