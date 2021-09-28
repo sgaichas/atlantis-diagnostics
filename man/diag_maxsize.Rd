@@ -43,8 +43,3 @@ Returns a data frame of species which do not meet defined max size criterion.
 Calculate average size of fish through time and check to see if any fish exceed the
 user supplied observed maximum size.
 }
-\examples{
-\dontrun{
-
-}
-}

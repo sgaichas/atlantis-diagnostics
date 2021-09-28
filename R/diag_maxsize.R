@@ -24,11 +24,7 @@
 #'
 #'@export
 #'
-#'
-#'@examples
-#'\dontrun{
-#'
-#'}
+
 
 
 diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCodes = NULL){
