@@ -44,7 +44,8 @@ Imports:
     ggforce,
     purrr,
     tidyr,
-    atlantistools
+    atlantistools,
+    rlang
 Remotes:
     andybeet/atlantistools,
     r4atlantis/atlantisom,
