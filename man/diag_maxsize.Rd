@@ -16,30 +16,43 @@ diag_maxsize(
 )
 }
 \arguments{
-\item{nc}{A character string. Path to location of model run output files.}
+\item{nc}{A character string. Path to location of main nc file.}
 
-\item{bgm}{A character string. Prefix added to all atlantis output files.}
+\item{bgm}{A character string. Path to location of bgm file.}
 
-\item{init}{A character string. Prefix added to all atlantis output files.}
+\item{init}{A character string. Path to location of init file.}
 
-\item{fgs}{A character string. Prefix added to all atlantis output files.}
+\item{fgs}{A character string. Path to location of fgs file.}
 
-\item{prm_run}{A character string. Prefix added to all atlantis output files.}
+\item{prm_run}{A character string. Path to location of prm_run file.}
 
-\item{prm_biol}{A character string. Prefix added to all atlantis output files.#'}
+\item{prm_biol}{A character string. Path to location of prm_biol files.}
 
-\item{speciesStats}{Data frame.}
+\item{speciesStats}{Data frame. Must contain at least 3 columns labeled \code{code} - Atlantis species codes
+,\code{maxObsWeight} - a value (g) indicating the maximum weight the species should weigh,
+\code{maxObsLength} - a value (cm) indicating the maximum length the species should grow to.}
 
-\item{speciesCodes}{Character vector. A vector of Atlantis species codes in which to test for persistence.
+\item{speciesCodes}{Character vector. A vector of Atlantis species codes in which to test for large fish.
 (Default = NULL, uses all species)}
 }
 \value{
-Returns a data frame of species which do not meet defined max size criterion.
+Returns a data frame indicating which species meet defined max weight/length criterion.
 
 \item{species}{The common name of the species/functional group}
 \item{code}{Atlantis Code for species/functional group}
+\item{polygon}{Polygon in which the largest individual occupies}
+\item{agecl}{Age class of the largest individual}
+\item{time}{Time in which the largest individual was found (Decimal years)}
+\item{maxLength}{Maximum length of species in Atlantis (cm)}
+\item{maxObsLength}{Maximum observed length of species (cm) - from litereature }
+\item{maxMeanWeight}{Maximum mean weight of indivdual in Atlantis (g)}
+\item{maxObsWeight}{Maximum observed weight of species (g) - from litereature}
+\item{passW}{Boolean indicating whether species maximum weight (from Atlantis) falls below max observed weight}
+\item{ratioW}{ratio of atlantis max weight to observed max weight}
+\item{passL}{Boolean indicating whether species maximum length (from Atlantis) falls below max observed length}
+\item{ratioL}{ratio of atlantis max length to observed max length}
 }
 \description{
 Calculate average size of fish through time and check to see if any fish exceed the
-user supplied observed maximum size.
+user supplied observed maximum size. Both maximum weight and maximum length are used
 }

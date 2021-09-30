@@ -1,26 +1,38 @@
 #' Test for max fish size
 #'
 #' Calculate average size of fish through time and check to see if any fish exceed the
-#' user supplied observed maximum size.
+#' user supplied observed maximum size. Both maximum weight and maximum length are used
 #'
-#'@param nc A character string. Path to location of model run output files.
-#'@param bgm A character string. Prefix added to all atlantis output files.
-#'@param init A character string. Prefix added to all atlantis output files.
-#'@param fgs A character string. Prefix added to all atlantis output files.
-#'@param prm_run A character string. Prefix added to all atlantis output files.
-#'@param prm_biol A character string. Prefix added to all atlantis output files.#'
-#'@param speciesStats Data frame.
-#'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for persistence.
+#'@param nc A character string. Path to location of main nc file.
+#'@param bgm A character string. Path to location of bgm file.
+#'@param init A character string. Path to location of init file.
+#'@param fgs A character string. Path to location of fgs file.
+#'@param prm_run A character string. Path to location of prm_run file.
+#'@param prm_biol A character string. Path to location of prm_biol files.
+#'@param speciesStats Data frame. Must contain at least 3 columns labeled \code{code} - Atlantis species codes
+#',\code{maxObsWeight} - a value (g) indicating the maximum weight the species should weigh,
+#'\code{maxObsLength} - a value (cm) indicating the maximum length the species should grow to.
+#'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for large fish.
 #'(Default = NULL, uses all species)
 #'
 #'@importFrom magrittr %>%
 #'@importFrom rlang .data
 #'
-#'
-#'@return Returns a data frame of species which do not meet defined max size criterion.
+#'@return Returns a data frame indicating which species meet defined max weight/length criterion.
 #'
 #'\item{species}{The common name of the species/functional group}
 #'\item{code}{Atlantis Code for species/functional group}
+#'\item{polygon}{Polygon in which the largest individual occupies}
+#'\item{agecl}{Age class of the largest individual}
+#'\item{time}{Time in which the largest individual was found (Decimal years)}
+#'\item{maxLength}{Maximum length of species in Atlantis (cm)}
+#'\item{maxObsLength}{Maximum observed length of species (cm) - from litereature }
+#'\item{maxMeanWeight}{Maximum mean weight of indivdual in Atlantis (g)}
+#'\item{maxObsWeight}{Maximum observed weight of species (g) - from litereature}
+#'\item{passW}{Boolean indicating whether species maximum weight (from Atlantis) falls below max observed weight}
+#'\item{ratioW}{ratio of atlantis max weight to observed max weight}
+#'\item{passL}{Boolean indicating whether species maximum length (from Atlantis) falls below max observed length}
+#'\item{ratioL}{ratio of atlantis max length to observed max length}
 #'
 #'@export
 #'
@@ -28,6 +40,10 @@
 
 
 diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCodes = NULL){
+
+  # select only the columns required
+  speciesStats <- speciesStats %>%
+    dplyr::select(code,maxObsLength,maxObsWeight)
 
   #Get boundary box
   bboxes =  atlantistools::get_boundary(boxinfo = atlantistools::load_box(bgm))
@@ -50,10 +66,12 @@ diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCo
   group.names = atlantistools::get_groups(fgs)
   # get age groups - 10 cohorts
   groups.age = atlantistools::get_age_groups(fgs)
+  # get age groups acronyms  - 10 cohorts
+  groups.age.acronym = atlantistools::get_age_acronyms(fgs)
   # get groups not with 10 cohorts
   groups.bp = group.names[!group.names %in% groups.age]
 
-  # list of variables ot pull from main nc file.
+  # list of variables to pull from main nc file.
   # Needed for biomass calculation. Each variable resides in list element
   vars = list('Nums','StructN','ResN','N')
   group.types = list(groups.age,groups.age,groups.age,groups.bp)
@@ -88,9 +106,10 @@ diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCo
     dplyr::filter(!is.na(.data$biomass)) %>%
     dplyr::mutate(meanWeight = .data$biomass/.data$numbers)
 
-  # select time and spac where max occurs
+  # select time and space where max occurs
   boxlayer <- jj %>% dplyr::group_by(.data$species,.data$polygon,.data$agecl, .data$time) %>%
-    dplyr::summarise(maxMeanWeight = max(.data$meanWeight),.groups="drop")
+    dplyr::summarise(maxMeanWeight = max(.data$meanWeight),.groups="drop") %>%
+    dplyr::rename(code = Code)
   maxVal <- boxlayer %>%
     dplyr::group_by(.data$species) %>%
     dplyr::summarise(maxVal = max(.data$maxMeanWeight),.groups="drop")
@@ -100,21 +119,34 @@ diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCo
     dplyr::select(-.data$maxVal)
 
 
+  # get length weight params from model W = aL^b
+  # note: estimating L from W using this relationship is incorrect
+  lenWeightParams <- atlantistools::prm_to_df(prm_biol,fgs,group = groups.age.acronyms,parameter = c("li_a","li_b"))
+
+
   # find the maximum weight for each species compare to large fish values from speciesStats
+  # do the same for the maximum length using Weight-length relationship
   largeFish <- boxlayer %>%
     dplyr::left_join(.,speciesLookup,by=c("species"="LongName")) %>%
-    dplyr::left_join(.,speciesStats,by = c("Code"="code")) %>%
-    dplyr::mutate(pass = ifelse(.data$maxMeanWeight<.data$maxObsWeight,TRUE,FALSE)) %>%
-    dplyr::arrange(.data$pass)  %>%
+    dplyr::left_join(.,speciesStats,by = "code") %>%
+    dplyr::mutate(passW = ifelse(.data$maxMeanWeight < .data$maxObsWeight,TRUE,FALSE)) %>%
     dplyr::select(-.data$scientificName,-.data$Common_Name) %>%
     dplyr::relocate(.data$Code,.after = .data$species) %>%
     dplyr::relocate(.data$maxMeanWeight, .before = .data$maxObsWeight) %>%
-    dplyr::mutate(ratio = .data$maxMeanWeight/.data$maxObsWeight)
+    dplyr::mutate(ratioW = .data$maxMeanWeight/.data$maxObsWeight) %>%
+    dplyr::left_join(.,lenWeightParams,by = "species") %>%
+    dplyr::mutate(maxLength = (.data$maxMeanWeight/.data$li_a)^(1/.data$li_b)) %>%
+    dplyr::select(-.data$li_a,-.data$li_b) %>%
+    dplyr::relocate(.data$maxLength,.after = .data$time) %>%
+    dplyr::mutate(passL = ifelse(.data$maxLength < .data$maxObsLength,TRUE,FALSE)) %>%
+    dplyr::mutate(ratioL = .data$maxLength/.data$maxObsLength) %>%
+    dplyr::arrange(.data$passW,.data$passL)
+
 
   # filter codes supplies by user
   if(!is.null(speciesCodes)) {
     largeFish <- largeFish %>%
-      dplyr::filter(Code %in% speciesCodes)
+      dplyr::filter(code %in% speciesCodes)
   }
 
 
