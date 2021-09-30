@@ -43,7 +43,7 @@
 
 <meta property="og:title" content="Test for max fish size — diag_maxsize" />
 <meta property="og:description" content="Calculate average size of fish through time and check to see if any fish exceed the
-user supplied observed maximum size." />
+user supplied observed maximum size. Both maximum weight and maximum length are used" />
 
 
 
@@ -118,7 +118,7 @@ user supplied observed maximum size." />
 
     <div class="ref-description">
     <p>Calculate average size of fish through time and check to see if any fish exceed the
-user supplied observed maximum size.</p>
+user supplied observed maximum size. Both maximum weight and maximum length are used</p>
     </div>
 
     <pre class="usage"><span class='fu'>diag_maxsize</span><span class='op'>(</span>
@@ -137,44 +137,57 @@ user supplied observed maximum size.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>nc</th>
-      <td><p>A character string. Path to location of model run output files.</p></td>
+      <td><p>A character string. Path to location of main nc file.</p></td>
     </tr>
     <tr>
       <th>bgm</th>
-      <td><p>A character string. Prefix added to all atlantis output files.</p></td>
+      <td><p>A character string. Path to location of bgm file.</p></td>
     </tr>
     <tr>
       <th>init</th>
-      <td><p>A character string. Prefix added to all atlantis output files.</p></td>
+      <td><p>A character string. Path to location of init file.</p></td>
     </tr>
     <tr>
       <th>fgs</th>
-      <td><p>A character string. Prefix added to all atlantis output files.</p></td>
+      <td><p>A character string. Path to location of fgs file.</p></td>
     </tr>
     <tr>
       <th>prm_run</th>
-      <td><p>A character string. Prefix added to all atlantis output files.</p></td>
+      <td><p>A character string. Path to location of prm_run file.</p></td>
     </tr>
     <tr>
       <th>prm_biol</th>
-      <td><p>A character string. Prefix added to all atlantis output files.#'</p></td>
+      <td><p>A character string. Path to location of prm_biol files.</p></td>
     </tr>
     <tr>
       <th>speciesStats</th>
-      <td><p>Data frame.</p></td>
+      <td><p>Data frame. Must contain at least 3 columns labeled <code>code</code> - Atlantis species codes
+,<code>maxObsWeight</code> - a value (g) indicating the maximum weight the species should weigh,
+<code>maxObsLength</code> - a value (cm) indicating the maximum length the species should grow to.</p></td>
     </tr>
     <tr>
       <th>speciesCodes</th>
-      <td><p>Character vector. A vector of Atlantis species codes in which to test for persistence.
+      <td><p>Character vector. A vector of Atlantis species codes in which to test for large fish.
 (Default = NULL, uses all species)</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Returns a data frame of species which do not meet defined max size criterion.</p>
+    <p>Returns a data frame indicating which species meet defined max weight/length criterion.</p>
 <dt>species</dt><dd><p>The common name of the species/functional group</p></dd>
 <dt>code</dt><dd><p>Atlantis Code for species/functional group</p></dd>
+<dt>polygon</dt><dd><p>Polygon in which the largest individual occupies</p></dd>
+<dt>agecl</dt><dd><p>Age class of the largest individual</p></dd>
+<dt>time</dt><dd><p>Time in which the largest individual was found (Decimal years)</p></dd>
+<dt>maxLength</dt><dd><p>Maximum length of species in Atlantis (cm)</p></dd>
+<dt>maxObsLength</dt><dd><p>Maximum observed length of species (cm) - from litereature</p></dd>
+<dt>maxMeanWeight</dt><dd><p>Maximum mean weight of indivdual in Atlantis (g)</p></dd>
+<dt>maxObsWeight</dt><dd><p>Maximum observed weight of species (g) - from litereature</p></dd>
+<dt>passW</dt><dd><p>Boolean indicating whether species maximum weight (from Atlantis) falls below max observed weight</p></dd>
+<dt>ratioW</dt><dd><p>ratio of atlantis max weight to observed max weight</p></dd>
+<dt>passL</dt><dd><p>Boolean indicating whether species maximum length (from Atlantis) falls below max observed length</p></dd>
+<dt>ratioL</dt><dd><p>ratio of atlantis max length to observed max length</p></dd>
 
 
   </div>
