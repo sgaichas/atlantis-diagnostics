@@ -41,20 +41,20 @@ diag_maxsize_txt <- function(atlDir,runPrefix,speciesStats,speciesCodes=NULL, nY
   }
 
   biomData <- atlantistools::load_txt(biomassFile) %>%
-    atlantistools::preprocess_txt(.,into = "code",removeZeros=F) %>%
-    dplyr::filter(code %in% speciesCodes) %>%
+    atlantistools::preprocess_txt(.data,into = "code",removeZeros=F) %>%
+    dplyr::filter(.data$code %in% speciesCodes) %>%
     dplyr::rename(biomass = .data$atoutput)
 
   ageData <- atlantistools::load_txt(ageFile) %>%
-    atlantistools::preprocess_txt(.,into = "code",removeZeros=F) %>%
+    atlantistools::preprocess_txt(.data,into = "code",removeZeros=F) %>%
     dplyr::filter(.data$code %in% speciesCodes) %>%
     dplyr::rename(age = .data$atoutput)
 
 
   joinData <- dplyr::left_join(biomData,ageData,by = c("time","code")) %>%
     dplyr::mutate(meanWeight=.data$biomass/.data$age) %>%
-    dplyr::group_by(code) %>%
-    dplyr::summarise(maxMeanWeight = max(meanWeight))
+    dplyr::group_by(.data$code) %>%
+    dplyr::summarise(maxMeanWeight = max(.data$meanWeight))
 
   # filter by speciesCodes
 

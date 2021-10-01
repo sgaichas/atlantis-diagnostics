@@ -20,7 +20,7 @@ A data frame
 \item{persistence}{Indicating pass or failure of persistence test}
 \item{proportionInitBio}{Metric for persistence. The proportion of initial biomass at \code{tminimumBiomass}}
 \item{stability}{Indicating pass or failure of stability test}
-\item{relChange}{Metric for stability. Rate of increase relative to \code{t1Biomass}(\code{mtperyear}/\code{t1Biomass}). see \code{\url{diag_stability}} }
+\item{relChange}{Metric for stability. Rate of increase relative to \code{t1Biomass}(\code{mtperyear}/\code{t1Biomass}). see \code{\link{diag_stability}} }
 \item{reasonability}{Indicating pass or failure of reasonability test}
 }
 \description{

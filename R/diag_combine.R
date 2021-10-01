@@ -13,7 +13,7 @@
 #' \item{persistence}{Indicating pass or failure of persistence test}
 #' \item{proportionInitBio}{Metric for persistence. The proportion of initial biomass at \code{tminimumBiomass}}
 #' \item{stability}{Indicating pass or failure of stability test}
-#' \item{relChange}{Metric for stability. Rate of increase relative to \code{t1Biomass}(\code{mtperyear}/\code{t1Biomass}). see \code{\url{diag_stability}} }
+#' \item{relChange}{Metric for stability. Rate of increase relative to \code{t1Biomass}(\code{mtperyear}/\code{t1Biomass}). see \code{\link{diag_stability}} }
 #' \item{reasonability}{Indicating pass or failure of reasonability test}
 #'
 #'@export
@@ -21,13 +21,13 @@
 diag_combine <- function(persistence, stability, reasonability){
 
   diagnostics <- persistence %>%
-    dplyr::left_join(.,stability,by = c("code","species")) %>%
-    dplyr::rename(persistence = pass.x, stability = pass.y) %>%
-    dplyr::select(code, species, persistence, stability, proportionInitBio, relChange) %>%
-    dplyr::left_join(.,reasonability,by=c("code","species")) %>%
-    dplyr::rename(reasonability = pass) %>%
-    dplyr::select(code, species, persistence,  proportionInitBio, stability, relChange,reasonability, maxExceedance) %>%
-    dplyr::arrange(persistence, reasonability, stability)
+    dplyr::left_join(.data,stability,by = c("code","species")) %>%
+    dplyr::rename(persistence = .data$pass.x, stability = .data$pass.y) %>%
+    dplyr::select(.data$code, .data$species, .data$persistence, .data$stability, .data$proportionInitBio, .data$relChange) %>%
+    dplyr::left_join(.data, reasonability,by=c("code","species")) %>%
+    dplyr::rename(reasonability = .data$pass) %>%
+    dplyr::select(.data$code, .data$species, .data$persistence,  .data$proportionInitBio, .data$stability, .data$relChange,.data$reasonability, .data$maxExceedance) %>%
+    dplyr::arrange(.data$persistence, .data$reasonability, .data$stability)
 
   return(diagnostics)
 

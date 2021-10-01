@@ -70,7 +70,8 @@ modelBiomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
 diag_stability(modelBiomass, nYrs = 20)
 
 # Only perform test on herring and white hake.
-# Require stability over the last 10 years of the run and and use alpha = 0.1 as tests significance level
+# Require stability over the last 10 years of the run and and use alpha = 0.1 as
+tests significance level
 diag_stability(modelBiomass, speciesCodes=c("HER","WHK"), nYrs = 10, relChangeThreshold = 0.01)
 }
 }

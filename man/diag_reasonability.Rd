@@ -87,8 +87,8 @@ diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, realBiomass=real
 surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 
 # Only perform test on herring and white hake.
-diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, speciesCodes =c("MAK","WHK"), realBiomass=realBiomass,
-surveyBounds = c(1,100), initBioBounds = c(0.5,2))
+diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, speciesCodes =c("MAK","WHK"),
+ realBiomass=realBiomass, surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 }
 }
 \seealso{

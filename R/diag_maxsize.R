@@ -15,9 +15,6 @@
 #'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for large fish.
 #'(Default = NULL, uses all species)
 #'
-#'@importFrom magrittr %>%
-#'@importFrom rlang .data
-#'
 #'@return Returns a data frame indicating which species meet defined max weight/length criterion.
 #'
 #'\item{species}{The common name of the species/functional group}
@@ -35,6 +32,9 @@
 #'\item{ratioL}{ratio of atlantis max length to observed max length}
 #'
 #'
+#'@importFrom magrittr %>%
+#'@importFrom rlang .data
+#'
 #'@export
 
 
@@ -43,33 +43,32 @@ diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCo
 
   # select only the columns required
   speciesStats <- speciesStats %>%
-    dplyr::select(code,maxObsLength,maxObsWeight)
+    dplyr::select(.data$code,.data$maxObsLength,.data$maxObsWeight)
 
   #Get boundary box
-  bboxes =  atlantistools::get_boundary(boxinfo = atlantistools::load_box(bgm))
+  bboxes <-   atlantistools::get_boundary(boxinfo = atlantistools::load_box(bgm))
   #Get epibenthic biopool groups
-  bio.pools = atlantistools::load_bps(fgs,init)
+  bio.pools <-  atlantistools::load_bps(fgs,init)
   #Read in box properties
-  vol.dz = atlantistools::load_nc_physics(nc = nc,
+  vol.dz <-  atlantistools::load_nc_physics(nc = nc,
                                           select_physics = c('volume','dz'),
                                           prm_run = prm_run,
                                           bboxes = bboxes)
   #Get biomass conversion scalar
-  bio.conv = atlantistools::get_conv_mgnbiot(prm_biol)
+  bio.conv <-  atlantistools::get_conv_mgnbiot(prm_biol)
 
 
   speciesLookup <- atlantistools::load_fgs(fgs) %>%
-    dplyr::select(.data$LongName, .data$Code) %>%
-    tibble::as_tibble()
+    dplyr::select(.data$LongName, .data$Code)
 
   # get group names
-  group.names = atlantistools::get_groups(fgs)
+  group.names <-  atlantistools::get_groups(fgs)
   # get age groups - 10 cohorts
-  groups.age = atlantistools::get_age_groups(fgs)
+  groups.age <-  atlantistools::get_age_groups(fgs)
   # get age groups acronyms  - 10 cohorts
-  groups.age.acronym = atlantistools::get_age_acronyms(fgs)
+  groups.age.acronym <-  atlantistools::get_age_acronyms(fgs)
   # get groups not with 10 cohorts
-  groups.bp = group.names[!group.names %in% groups.age]
+  groups.bp <-  group.names[!group.names %in% groups.age]
 
   # list of variables to pull from main nc file.
   # Needed for biomass calculation. Each variable resides in list element
@@ -94,7 +93,7 @@ diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCo
                                                              bps = bio.pools)
   # grab numbers in time and space
   spatialNumbers = rawdata.main[[1]] %>%
-    dplyr::rename(numbers = atoutput)
+    dplyr::rename(numbers = .data$atoutput)
   # filter biomass for species with 10 cohorts and convert to kilograms
   spatialBiomass <- spatial.biomass %>%
     dplyr::filter(.data$species %in% unique(spatialNumbers$species)) %>%
@@ -102,39 +101,39 @@ diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCo
     dplyr::mutate(biomass = 1E6*.data$biomass)
 
   # join numbers with biomass and calculate mean weight of an individivual in age, polygon, layer, time
-  jj <- spatialNumbers %>% dplyr::left_join(.,spatialBiomass,by = c("species", "agecl", "polygon", "layer", "time")) %>%
+  jj <- spatialNumbers %>% dplyr::left_join(.data,spatialBiomass,by = c("species", "agecl", "polygon", "layer", "time")) %>%
     dplyr::filter(!is.na(.data$biomass)) %>%
     dplyr::mutate(meanWeight = .data$biomass/.data$numbers)
 
   # select time and space where max occurs
   boxlayer <- jj %>% dplyr::group_by(.data$species,.data$polygon,.data$agecl, .data$time) %>%
     dplyr::summarise(maxMeanWeight = max(.data$meanWeight),.groups="drop") %>%
-    dplyr::rename(code = Code)
+    dplyr::rename(code = .data$Code)
   maxVal <- boxlayer %>%
     dplyr::group_by(.data$species) %>%
     dplyr::summarise(maxVal = max(.data$maxMeanWeight),.groups="drop")
   boxlayer <- boxlayer %>%
-    dplyr::left_join(.,maxVal,by = "species") %>%
-    dplyr::filter(maxMeanWeight == .data$maxVal) %>%
+    dplyr::left_join(.data,maxVal,by = "species") %>%
+    dplyr::filter(.data$maxMeanWeight == .data$maxVal) %>%
     dplyr::select(-.data$maxVal)
 
 
   # get length weight params from model W = aL^b
   # note: estimating L from W using this relationship is incorrect
-  lenWeightParams <- atlantistools::prm_to_df(prm_biol,fgs,group = groups.age.acronyms,parameter = c("li_a","li_b"))
+  lenWeightParams <- atlantistools::prm_to_df(prm_biol,fgs,group = groups.age.acronym,parameter = c("li_a","li_b"))
 
 
   # find the maximum weight for each species compare to large fish values from speciesStats
   # do the same for the maximum length using Weight-length relationship
   largeFish <- boxlayer %>%
-    dplyr::left_join(.,speciesLookup,by=c("species"="LongName")) %>%
-    dplyr::left_join(.,speciesStats,by = "code") %>%
+    dplyr::left_join(.data,speciesLookup,by=c("species"="LongName")) %>%
+    dplyr::left_join(.data,speciesStats,by = "code") %>%
     dplyr::mutate(passW = ifelse(.data$maxMeanWeight < .data$maxObsWeight,TRUE,FALSE)) %>%
     dplyr::select(-.data$scientificName,-.data$Common_Name) %>%
     dplyr::relocate(.data$Code,.after = .data$species) %>%
     dplyr::relocate(.data$maxMeanWeight, .before = .data$maxObsWeight) %>%
     dplyr::mutate(ratioW = .data$maxMeanWeight/.data$maxObsWeight) %>%
-    dplyr::left_join(.,lenWeightParams,by = "species") %>%
+    dplyr::left_join(.data,lenWeightParams,by = "species") %>%
     dplyr::mutate(maxLength = (.data$maxMeanWeight/.data$li_a)^(1/.data$li_b)) %>%
     dplyr::select(-.data$li_a,-.data$li_b) %>%
     dplyr::relocate(.data$maxLength,.after = .data$time) %>%
@@ -146,7 +145,7 @@ diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCo
   # filter codes supplies by user
   if(!is.null(speciesCodes)) {
     largeFish <- largeFish %>%
-      dplyr::filter(code %in% speciesCodes)
+      dplyr::filter(.data$code %in% speciesCodes)
   }
 
 

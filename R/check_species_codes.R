@@ -7,14 +7,16 @@
 #'
 #' @return Vector of valid Codes
 #'
+#' @importFrom rlang .data
+#'
 #' @noRd
 
 check_species_codes <- function(modelBiomass,speciesCodes){
 
   # use default options
   atlantisCodes <- modelBiomass %>%
-    dplyr::filter(!is.na(code)) %>%
-    dplyr::distinct(code) %>%
+    dplyr::filter(!is.na(.data$code)) %>%
+    dplyr::distinct(.data$code) %>%
     dplyr::pull()
   # use default options
   if (is.null(speciesCodes)) { # select all species

@@ -15,7 +15,6 @@
 #'@param relChangeThreshold Numeric Scalar. Maximum magnitude of relative change of slope (Default = 0.01)
 #'@param plot Logical. Specifying whether the function should generate plots or not. (Default is F).
 #'
-#'@importFrom magrittr %>%
 #'
 #'@return Returns a data frame of all species and how they measure up against the stability criterion
 #'\item{code}{Atlantis Code for species/functional group}
@@ -43,6 +42,8 @@
 #'
 #'@export
 #'
+#'@importFrom magrittr %>%
+#'@importFrom rlang .data
 #'
 #'@examples
 #'\dontrun{
@@ -57,7 +58,8 @@
 #' diag_stability(modelBiomass, nYrs = 20)
 #'
 #' # Only perform test on herring and white hake.
-#' # Require stability over the last 10 years of the run and and use alpha = 0.1 as tests significance level
+#' # Require stability over the last 10 years of the run and and use alpha = 0.1 as
+#' tests significance level
 #' diag_stability(modelBiomass, speciesCodes=c("HER","WHK"), nYrs = 10, relChangeThreshold = 0.01)
 #'}
 
@@ -70,12 +72,12 @@ diag_stability <- function(modelBiomass, initialYr = 1964, speciesCodes, nYrs = 
   # filter model biomass and average over the year
   # join with initial biomass
   modelBiomass <- modelBiomass %>%
-    dplyr::select(time, atoutput, code, species) %>%
-    dplyr::rename(value=atoutput) %>%
-    dplyr::mutate(yearStep= floor(time/365)) %>%
-    dplyr::group_by(code,yearStep,species) %>%
-    dplyr::summarise(meanBio = mean(value),.groups="drop") %>% # average over year, removes seasonal cycle
-    dplyr::mutate(year = yearStep+initialYr,yearStep=NULL) %>%
+    dplyr::select(.data$time, .data$atoutput, .data$code, .data$species) %>%
+    dplyr::rename(value=.data$atoutput) %>%
+    dplyr::mutate(yearStep= floor(.data$time/365)) %>%
+    dplyr::group_by(.data$code,.data$yearStep,.data$species) %>%
+    dplyr::summarise(meanBio = mean(.data$value),.groups="drop") %>% # average over year, removes seasonal cycle
+    dplyr::mutate(year = .data$yearStep+initialYr, yearStep=NULL) %>%
     dplyr::ungroup()
 
   if (is.null(nYrs)) { # use all time series
@@ -86,37 +88,37 @@ diag_stability <- function(modelBiomass, initialYr = 1964, speciesCodes, nYrs = 
 
   # select species, time frame, group, nest
   stable <- modelBiomass %>%
-    dplyr::filter(year > filterTime) %>%
-    dplyr::filter(code %in% speciesCodes) %>%
-    dplyr::group_by(code,species) %>%
+    dplyr::filter(.data$year > filterTime) %>%
+    dplyr::filter(.data$code %in% speciesCodes) %>%
+    dplyr::group_by(.data$code,.data$species) %>%
     #dplyr::mutate(t1Biomass = dplyr::first(meanBio)) %>%
-    dplyr::group_by(code,species) %>%
+    dplyr::group_by(.data$code,.data$species) %>%
     tidyr::nest() # produces a column called data
 
   # fit linear model (biomass = alpha + year.beta) to each species over the time frame specified
   # then extract slope and significance from model fit
 
   stability <- stable %>%
-    dplyr::mutate(model = purrr::map(data,fitlm)) %>%
+    dplyr::mutate(model = purrr::map(.data$data,fitlm)) %>%
     #dplyr::transmute(species,mtPerYear = purrr::map_dbl(model,coefs),pValue=purrr::map_dbl(model,pVals)) %>%
-    dplyr::transmute(species,t1Fit = purrr::map_dbl(model,fittedVal),
-                     mtPerYear = purrr::map_dbl(model,coefs),
-                     aveBio = purrr::map_dbl(data,meanData)) %>%
+    dplyr::transmute(.data$species,t1Fit = purrr::map_dbl(.data$model,fittedVal),
+                     mtPerYear = purrr::map_dbl(.data$model,coefs),
+                     aveBio = purrr::map_dbl(.data$data,meanData)) %>%
     #dplyr::mutate(pass = pValue > sigTest) %>%
     dplyr::ungroup() %>%
-    dplyr::mutate(relChange = mtPerYear/t1Fit) %>%
-    dplyr::mutate(sign = base::sign(mtPerYear)) %>%
-    dplyr::mutate(pass = abs(relChange) < relChangeThreshold) %>%
+    dplyr::mutate(relChange = .data$mtPerYear/.data$t1Fit) %>%
+    dplyr::mutate(sign = base::sign(.data$mtPerYear)) %>%
+    dplyr::mutate(pass = abs(.data$relChange) < relChangeThreshold) %>%
     # average biomass < 1 metric ton
-    dplyr::mutate(pass = dplyr::if_else(aveBio < 1,F,pass)) %>%
-    dplyr::mutate(sign = dplyr::if_else(aveBio < 1,NaN,sign)) %>%
-    dplyr::mutate(relChange = dplyr::if_else(aveBio < 1,NaN,relChange)) %>%
-    dplyr::mutate(t1Fit = dplyr::if_else(aveBio < 1,NaN,t1Fit)) %>%
-    dplyr::mutate(mtPerYear = dplyr::if_else(aveBio < 1,NaN,mtPerYear))
+    dplyr::mutate(pass = dplyr::if_else(.data$aveBio < 1,F,.data$pass)) %>%
+    dplyr::mutate(sign = dplyr::if_else(.data$aveBio < 1,NaN,.data$sign)) %>%
+    dplyr::mutate(relChange = dplyr::if_else(.data$aveBio < 1,NaN,.data$relChange)) %>%
+    dplyr::mutate(t1Fit = dplyr::if_else(.data$aveBio < 1,NaN,.data$t1Fit)) %>%
+    dplyr::mutate(mtPerYear = dplyr::if_else(.data$aveBio < 1,NaN,.data$mtPerYear))
 
 
   stability <- stability %>%
-    dplyr::arrange(pass,desc(abs(relChange)))
+    dplyr::arrange(.data$pass,dplyr::desc(abs(.data$relChange)))
 
   return(stability)
 
@@ -125,28 +127,7 @@ diag_stability <- function(modelBiomass, initialYr = 1964, speciesCodes, nYrs = 
 }
 
 
-## Helper functions
 
-coefs <- function(model){
-  coefficients(model)[["year"]]
-}
-
-pVals <- function(model){
-  summary(model)$coefficients[,4][["year"]]
-}
-
-fitlm <- function(df){
-  lm(meanBio ~ year, data=df)
-}
-
-fittedVal <- function(model) {
-  # first fitted value
-  fitted.values(model)[[1]]
-}
-
-meanData <- function(df){
-  mean(df$meanBio)
-}
 
 
 

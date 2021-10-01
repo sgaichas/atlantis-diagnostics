@@ -20,8 +20,6 @@
 #'@param plot A logical value specifying if the function should generate plots or
 #'not. (Default = F). NOT YET IMPLEMENTED
 #'
-#'@importFrom magrittr %>%
-#'
 #'
 #'@return Returns a data frame of species
 #'
@@ -48,6 +46,8 @@
 #'
 #'@export
 #'
+#'@importFrom magrittr %>%
+#'@importFrom rlang .data
 #'
 #'@examples
 #'\dontrun{
@@ -71,12 +71,18 @@
 #' surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 #'
 #' # Only perform test on herring and white hake.
-#' diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, speciesCodes =c("MAK","WHK"), realBiomass=realBiomass,
-#' surveyBounds = c(1,100), initBioBounds = c(0.5,2))
+#' diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, speciesCodes =c("MAK","WHK"),
+#'  realBiomass=realBiomass, surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 #'}
 
-diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, realBiomass, nYrs = NULL,
-                               surveyBounds = c(1,1), initBioBounds = c(0.5,10), plot=F){
+diag_reasonability <- function(modelBiomass,
+                               initialYr=1964,
+                               speciesCodes=NULL,
+                               realBiomass,
+                               nYrs = NULL,
+                               surveyBounds = c(1,1),
+                               initBioBounds = c(0.5,10),
+                               plot=F){
 
   ################################################
   ########### model output #######################
@@ -87,29 +93,28 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
 
   # list of Atlantis species and Atlantis codes. Pulled from model output
   species <- modelBiomass %>%
-    dplyr::select(species,code) %>%
-    dplyr::filter(!is.na(code)) %>%
-    dplyr::distinct(species,code)
+    dplyr::select(.data$species,.data$code) %>%
+    dplyr::filter(!is.na(.data$code)) %>%
+    dplyr::distinct(.data$species,.data$code)
 
   # pull initial biomass for each species/group
   initialBiomass <- modelBiomass %>%
-    dplyr::group_by(species) %>%
-    dplyr::mutate(initialBiomass = dplyr::first(atoutput)) %>%
-    dplyr::select(species,code,initialBiomass) %>%
-    dplyr::distinct(species,code,initialBiomass)
+    dplyr::group_by(.data$species) %>%
+    dplyr::mutate(initialBiomass = dplyr::first(.data$atoutput)) %>%
+    dplyr::select(.data$species,.data$code,.data$initialBiomass) %>%
+    dplyr::distinct(.data$species,.data$code,.data$initialBiomass)
 
   # filter model biomass and average over the year
   # join with initial biomass
   modelBiomass <- modelBiomass %>%
-    dplyr::select(time, atoutput, code, species) %>%
-    dplyr::rename(value=atoutput) %>%
-    dplyr::mutate(yearStep= floor(time/365)) %>%
-    dplyr::group_by(code,yearStep,species) %>%
-    dplyr::summarise(modelBiomass = mean(value),.groups="drop") %>%
-    dplyr::mutate(year = yearStep+initialYr,yearStep=NULL) %>%
+    dplyr::select(.data$time, .data$atoutput, .data$code, .data$species) %>%
+    dplyr::rename(value=.data$atoutput) %>%
+    dplyr::mutate(yearStep= floor(.data$time/365)) %>%
+    dplyr::group_by(.data$code,.data$yearStep,.data$species) %>%
+    dplyr::summarise(modelBiomass = mean(.data$value),.groups="drop") %>%
+    dplyr::mutate(year = .data$yearStep+initialYr,yearStep=NULL) %>%
     dplyr::ungroup() %>%
-    dplyr::left_join(.,initialBiomass,by=c("code","species")) %>%
-    tibble::as_tibble()
+    dplyr::left_join(.data,initialBiomass,by=c("code","species"))
 
   ################################################
   ############## observed data ###################
@@ -118,21 +123,21 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
   # filter real biomass data to select only species that are fished in the atlantis model
   # then remove sharks, whales, birds etc if present.
   speciesBiomass <- realBiomass %>%
-    dplyr::filter(isFishedSpecies == T) %>%
-    dplyr::filter(!grepl("shark",Species)) %>%
-    dplyr::filter(!grepl("whale",Species)) %>%
-    dplyr::filter(!grepl("bird",Species)) %>%
-    dplyr::filter(!grepl("salmon",Species)) %>%
-    dplyr::select(YEAR,variable,value,Code,Species) %>%
-    dplyr::rename(year=YEAR,code=Code)
+    dplyr::filter(.data$isFishedSpecies == T) %>%
+    dplyr::filter(!grepl("shark",.data$Species)) %>%
+    dplyr::filter(!grepl("whale",.data$Species)) %>%
+    dplyr::filter(!grepl("bird",.data$Species)) %>%
+    dplyr::filter(!grepl("salmon",.data$Species)) %>%
+    dplyr::select(.data$YEAR,.data$variable,.data$value,.data$Code,.data$Species) %>%
+    dplyr::rename(year=.data$YEAR,code=.data$Code)
 
   ## some codes have multiple species associated
   # aggregate biomass over all species within a code
   # metric tonnes
   speciesBiomass <- speciesBiomass %>%
-    dplyr::group_by(year,variable,code) %>%
-    dplyr::summarise(realBiomass = sum(value),nSpecies = dplyr::n(),.groups="drop") %>%
-    tidyr::pivot_wider(.,names_from = variable,values_from = realBiomass)
+    dplyr::group_by(.data$year,.data$variable,.data$code) %>%
+    dplyr::summarise(realBiomass = sum(.data$value),nSpecies = dplyr::n(),.groups="drop") %>%
+    tidyr::pivot_wider(.data,names_from = .data$variable,values_from = .data$realBiomass)
 
   # find final year of model run
   maxRuntime <- max(modelBiomass$year)
@@ -153,8 +158,8 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
 
     # filter real/observed data by species and the time frame
     rb <- speciesBiomass %>%
-      dplyr::filter(code == acode) %>%
-      dplyr::filter(year > filterTime)
+      dplyr::filter(.data$code == acode) %>%
+      dplyr::filter(.data$year > filterTime)
 
 
     # if data available for species code then get model data for time range
@@ -164,17 +169,18 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
       # compare model biomass output against scaled initial biomass
       # calculate goodness of fit (mef)
       mb <- modelBiomass %>%
-        dplyr::filter(code == acode) %>%
-        dplyr::filter(year > filterTime) %>%
-        dplyr::mutate(reasonable = (modelBiomass < initialBiomass*initBioBounds[2]) & (modelBiomass >= initialBiomass*initBioBounds[1])) %>%
-        dplyr::mutate(modelSkill = calc_mef(modelBiomass,initialBiomass)$mef) %>%
-        dplyr::mutate(minBiomass = min(modelBiomass)) %>%
-        dplyr::mutate(maxBiomass = max(modelBiomass)) %>%
-        dplyr::mutate(propInitBio = maxBiomass/initialBiomass) %>%
-        dplyr::mutate(propAboveUpper = maxBiomass/(initialBiomass*initBioBounds[2]) - 1) %>%
-        dplyr::mutate(propBelowLower = -minBiomass/(initialBiomass*initBioBounds[1]) + 1) %>%
-        dplyr::group_by(code) %>%
-        dplyr::mutate(maxExceedance = max(propBelowLower,propAboveUpper)) %>%
+        dplyr::filter(.data$code == acode) %>%
+        dplyr::filter(.data$year > filterTime) %>%
+        dplyr::mutate(reasonable = (.data$modelBiomass < .data$initialBiomass*initBioBounds[2]) &
+                        (.data$modelBiomass >= .data$initialBiomass*initBioBounds[1])) %>%
+        dplyr::mutate(modelSkill = calc_mef(.data$modelBiomass,.data$initialBiomass)$mef) %>%
+        dplyr::mutate(minBiomass = min(.data$modelBiomass)) %>%
+        dplyr::mutate(maxBiomass = max(.data$modelBiomass)) %>%
+        dplyr::mutate(propInitBio = .data$maxBiomass/.data$initialBiomass) %>%
+        dplyr::mutate(propAboveUpper = .data$maxBiomass/(.data$initialBiomass*initBioBounds[2]) - 1) %>%
+        dplyr::mutate(propBelowLower = -.data$minBiomass/(.data$initialBiomass*initBioBounds[1]) + 1) %>%
+        dplyr::group_by(.data$code) %>%
+        dplyr::mutate(maxExceedance = max(.data$propBelowLower,.data$propAboveUpper)) %>%
         dplyr::ungroup()
 
       test <- "initialBio"
@@ -184,18 +190,19 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
       # compare model biomass against scaled survey estimates
       # calculate goodness of fit (mef)
       mb <- modelBiomass %>%
-        dplyr::filter(code == acode) %>%
-        dplyr::filter(year > filterTime) %>%
-        dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
-        dplyr::mutate(reasonable = (modelBiomass < max(tot.biomass)*surveyBounds[2]) & (modelBiomass > min(tot.biomass)*surveyBounds[1])) %>%
-        dplyr::mutate(modelSkill = calc_mef(tot.biomass,modelBiomass)$mef) %>%
-        dplyr::mutate(minBiomass = min(modelBiomass)) %>%
-        dplyr::mutate(maxBiomass = max(modelBiomass)) %>%
-        dplyr::mutate(propInitBio = maxBiomass/initialBiomass) %>%
-        dplyr::mutate(propAboveUpper = maxBiomass/(max(tot.biomass)*surveyBounds[2]) - 1) %>%
-        dplyr::mutate(propBelowLower = -minBiomass/(min(tot.biomass)*surveyBounds[1]) + 1) %>%
-        dplyr::group_by(code) %>%
-        dplyr::mutate(maxExceedance = max(propBelowLower,propAboveUpper)) %>%
+        dplyr::filter(.data$code == acode) %>%
+        dplyr::filter(.data$year > filterTime) %>%
+        dplyr::left_join(.data,rb,by=c("code"="code","year"="year")) %>%
+        dplyr::mutate(reasonable = (.data$modelBiomass < max(.data$tot.biomass)*surveyBounds[2]) &
+                        (.data$modelBiomass > min(.data$tot.biomass)*surveyBounds[1])) %>%
+        dplyr::mutate(modelSkill = calc_mef(.data$tot.biomass,.data$modelBiomass)$mef) %>%
+        dplyr::mutate(minBiomass = min(.data$modelBiomass)) %>%
+        dplyr::mutate(maxBiomass = max(.data$modelBiomass)) %>%
+        dplyr::mutate(propInitBio = .data$maxBiomass/.data$initialBiomass) %>%
+        dplyr::mutate(propAboveUpper = .data$maxBiomass/(max(.data$tot.biomass)*surveyBounds[2]) - 1) %>%
+        dplyr::mutate(propBelowLower = -.data$minBiomass/(min(.data$tot.biomass)*surveyBounds[1]) + 1) %>%
+        dplyr::group_by(.data$code) %>%
+        dplyr::mutate(maxExceedance = max(.data$propBelowLower,.data$propAboveUpper)) %>%
         dplyr::ungroup()
 
       test <- "data"
@@ -203,28 +210,30 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
 
     # filter all years failing test
     out <- mb %>%
-      dplyr::filter(reasonable == F)
+      dplyr::filter(.data$reasonable == F)
 
 
     if(nrow(out) == 0) { # all pass
       # create output
       out <- mb %>%
-        dplyr::select(code,species,initialBiomass,modelSkill,minBiomass,maxBiomass,propInitBio,propBelowLower,propAboveUpper,maxExceedance) %>%
+        dplyr::select(.data$code,.data$species,.data$initialBiomass,.data$modelSkill,.data$minBiomass,.data$maxBiomass,
+                      .data$propInitBio,.data$propBelowLower,.data$propAboveUpper,.data$maxExceedance) %>%
         dplyr::distinct() %>%
         dplyr::mutate(t1 = NA) %>%
         dplyr::mutate(tn = NA) %>%
         dplyr::mutate(nts = 0) %>%
         dplyr::mutate(pass = T) %>%
-        dplyr::mutate(test = test)
+        dplyr::mutate(test = .data$test)
     } else { # some failure
       out <- mb %>%
-        dplyr::filter(reasonable == F) %>%
-        dplyr::mutate(t1 = min(year)) %>%
-        dplyr::mutate(tn = max(year)) %>%
-        dplyr::group_by(code,species,initialBiomass,t1,tn,modelSkill,minBiomass,maxBiomass,propInitBio,propBelowLower,propAboveUpper,maxExceedance) %>%
-        dplyr::summarize(nts = sum(!reasonable),.groups="drop") %>%
-        dplyr::mutate(pass = dplyr::if_else(nts>0,F,T)) %>%
-        dplyr::mutate(test = test)
+        dplyr::filter(.data$reasonable == F) %>%
+        dplyr::mutate(t1 = min(.data$year)) %>%
+        dplyr::mutate(tn = max(.data$year)) %>%
+        dplyr::group_by(.data$code,.data$species,.data$initialBiomass,.data$t1,.data$tn,.data$modelSkill,.data$minBiomass,.data$maxBiomass,
+                        .data$propInitBio,.data$propBelowLower,.data$propAboveUpper,.data$maxExceedance) %>%
+        dplyr::summarize(nts = sum(!.data$reasonable),.groups="drop") %>%
+        dplyr::mutate(pass = dplyr::if_else(.data$nts>0,F,T)) %>%
+        dplyr::mutate(test = .data$test)
 
     }
 
@@ -233,7 +242,7 @@ diag_reasonability <- function(modelBiomass, initialYr=1964, speciesCodes=NULL, 
 
   }
   reasonable <- reasonable %>%
-    dplyr::arrange(pass,desc(maxExceedance))
+    dplyr::arrange(.data$pass,dplyr::desc(.data$maxExceedance))
 
   return(reasonable)
 

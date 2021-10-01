@@ -1,3 +1,9 @@
 ^atlantisdiagnostics\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
+
+.github
+other
+pkgdown
+docs
+test

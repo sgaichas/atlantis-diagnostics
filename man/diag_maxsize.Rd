@@ -18,15 +18,15 @@ diag_maxsize(
 \arguments{
 \item{nc}{A character string. Path to location of main nc file.}
 
-\item{bgm}{A character string. Path to location of bgm file.}
+\item{bgm}{A character string. Path to location of box coordinates bgm file.}
 
-\item{init}{A character string. Path to location of init file.}
+\item{init}{A character string. Path to location of initial conditions nc file.}
 
-\item{fgs}{A character string. Path to location of fgs file.}
+\item{fgs}{A character string. Path to location of functional groups file.}
 
-\item{prm_run}{A character string. Path to location of prm_run file.}
+\item{prm_run}{A character string. Path to location of run parameter file file.}
 
-\item{prm_biol}{A character string. Path to location of prm_biol files.}
+\item{prm_biol}{A character string. Path to location of biology parameter file.}
 
 \item{speciesStats}{Data frame. Must contain at least 3 columns labeled \code{code} - Atlantis species codes
 ,\code{maxObsWeight} - a value (g) indicating the maximum weight the species should weigh,
