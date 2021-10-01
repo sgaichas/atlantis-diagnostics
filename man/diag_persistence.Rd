@@ -5,7 +5,8 @@
 \title{Test for functional group persistence}
 \usage{
 diag_persistence(
-  modelBiomass,
+  fgs,
+  biomind,
   speciesCodes = NULL,
   nYrs = NULL,
   floor = 0.1,
@@ -15,11 +16,12 @@ diag_persistence(
 )
 }
 \arguments{
-\item{modelBiomass}{A data frame. Total biomass of all groups over time, read in from
-Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
+\item{fgs}{A character string. Path to location of functional groups file.}
+
+\item{biomind}{A character string. Path to the BiomIndx.txt file.}
 
 \item{speciesCodes}{Character vector. A vector of Atlantis species codes in which to test for persistence.
-(Default = NULL, uses all species found in  \code{modelBiomass})}
+(Default = NULL, uses all species with \code{IsTurnedOn=1} in \code{fgs} file)}
 
 \item{nYrs}{Numeric scalar. Number of years from the end of the time series that persistence must occur.
 (Default = NULL, persistence must occur throughout entire time series)}
@@ -55,20 +57,17 @@ used in the test
 }
 \examples{
 \dontrun{
+
 # Declare paths to files required
-biol.file <- "neus_outputBiomIndx.txt"
-file_fgs <- "neus_groups.csv"
-# use atlantisom to read them in
-fgs <- atlantisom::load_fgs(inDir,file_fgs)
-modelBiomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
+biomind <- paste("Full path to file","xxxBiomIndx.txt")
+fgs <- paste("Full path to file","functioalGgroups.csv")
 
 # find all species that do not have biomass > 0 for any time during the run.
-
-diag_persistence(modelBiomass,speciesCodes=NULL, nYrs = NULL, floor = 0)
+diag_persistence(fgs,biomind,speciesCodes=NULL, nYrs = NULL, floor = 0)
 
 # only evaluate herring. Require stability over the last 10 years of the run and all values should
 # exceed 10\% of initial biomass
-diag_persistence(modlBiomass, speciesCodes="HER", nYrs = 10, floor = 0.1)
+diag_persistence(fgs,biomind, speciesCodes="HER", nYrs = 10, floor = 0.1)
 
 }
 }

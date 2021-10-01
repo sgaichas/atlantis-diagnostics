@@ -4,10 +4,10 @@
 #' is flagged. The floors are specifies as a proportion of initial biomass. The last n years of the run are
 #' used in the test
 #'
-#'@param modelBiomass A data frame. Total biomass of all groups over time, read in from
-#'Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.
+#'@param fgs A character string. Path to location of functional groups file.
+#'@param biomind A character string. Path to the BiomIndx.txt file.
 #'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for persistence.
-#'(Default = NULL, uses all species found in  \code{modelBiomass})
+#'(Default = NULL, uses all species with \code{IsTurnedOn=1} in \code{fgs} file)
 #'@param nYrs Numeric scalar. Number of years from the end of the time series that persistence must occur.
 #' (Default = NULL, persistence must occur throughout entire time series)
 #'@param floor Numeric scalar. Proportion of initial biomass for which for which all species
@@ -39,34 +39,56 @@
 #'
 #'@examples
 #'\dontrun{
+#'
 #'# Declare paths to files required
-#' biol.file <- "neus_outputBiomIndx.txt"
-#' file_fgs <- "neus_groups.csv"
-#' # use atlantisom to read them in
-#' fgs <- atlantisom::load_fgs(inDir,file_fgs)
-#' modelBiomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
+#' biomind <- paste("Full path to file","xxxBiomIndx.txt")
+#' fgs <- paste("Full path to file","functioalGgroups.csv")
 #'
 #' # find all species that do not have biomass > 0 for any time during the run.
-#'
-#' diag_persistence(modelBiomass,speciesCodes=NULL, nYrs = NULL, floor = 0)
+#' diag_persistence(fgs,biomind,speciesCodes=NULL, nYrs = NULL, floor = 0)
 #'
 #' # only evaluate herring. Require stability over the last 10 years of the run and all values should
 #' # exceed 10% of initial biomass
-#' diag_persistence(modlBiomass, speciesCodes="HER", nYrs = 10, floor = 0.1)
+#' diag_persistence(fgs,biomind, speciesCodes="HER", nYrs = 10, floor = 0.1)
 #'
 #'}
 
-diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor = 0.1, display=NULL, tol = 1E-6, plot=F){
+diag_persistence <- function(fgs,
+                             biomind,
+                             speciesCodes=NULL,
+                             nYrs = NULL,
+                             floor = 0.1,
+                             display=NULL,
+                             tol = 1E-6,
+                             plot=F){
 
-  # need in annual units? Or fail when any output timestep below threshold?
-  # make safe for migratory species, assume that over the course of the year mean B > 0.
-  # assumes biomass never goes negative in atlantis
+  # get species codes
+  allCodes <- atlantistools::get_turnedon_acronyms(fgs)
+  if(!is.null(speciesCodes)) { # user supplied codes
+    # check to see if codes are valid model codes
+    invalidCodes <- base::setdiff(speciesCodes,allCodes)
+    if (!(length(invalidCodes)==0)){
+      stop("Invalid Atlantis group codes: ",paste0(invalidCodes,collapse=", "))
+    }
+  } else { # use all codes
+    speciesCodes <- allCodes
+  }
+
+  # Need common name of species for output. read in fgs file and select common name and code
+  functionalGps <- atlantistools::load_fgs(fgs)
+  speciesNames <- functionalGps %>%
+    dplyr::select(Code,Name)
+
+  # get biomass from biomIndx file
+  modelBiomass <- atlantistools::load_txt(biomind)  %>%
+    dplyr::filter(.data$code %in% speciesCodes) %>%
+    dplyr::left_join(., speciesNames, by=c("code"="Code")) %>%
+    dplyr::rename(species = .data$Name) %>%
+    dplyr::relocate(.data$species, .before = .data$time) %>%
+    dplyr::arrange(.data$species,.data$time)
 
   # find final time step value
   maxRuntime <- max(modelBiomass$time)
-
-  # check for valid species Codes & clean
-  speciesCodes <- check_species_codes(modelBiomass,speciesCodes)
 
   if (is.null(nYrs)) { # use all time series
     filterTime <- 0
@@ -77,7 +99,7 @@ diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor
   # For each species calculate which time steps biomass is below persistence threshold
   # we look at biomass < % initial Biomass
   status <- modelBiomass %>%
-    dplyr::filter(.data$code %in% .data$speciesCodes) %>%
+    dplyr::filter(.data$code %in% speciesCodes) %>%
     dplyr::select(.data$code,.data$species, .data$time, .data$atoutput) %>%
     dplyr::group_by(.data$code) %>%
     dplyr::mutate(initialBiomass = dplyr::first(.data$atoutput)) %>%
