@@ -4,11 +4,11 @@
 #' user supplied observed maximum size. Both maximum weight and maximum length are used
 #'
 #'@param nc A character string. Path to location of main nc file.
-#'@param bgm A character string. Path to location of bgm file.
-#'@param init A character string. Path to location of init file.
-#'@param fgs A character string. Path to location of fgs file.
-#'@param prm_run A character string. Path to location of prm_run file.
-#'@param prm_biol A character string. Path to location of prm_biol files.
+#'@param bgm A character string. Path to location of box coordinates bgm file.
+#'@param init A character string. Path to location of initial conditions nc file.
+#'@param fgs A character string. Path to location of functional groups file.
+#'@param prm_run A character string. Path to location of run parameter file file.
+#'@param prm_biol A character string. Path to location of biology parameter file.
 #'@param speciesStats Data frame. Must contain at least 3 columns labeled \code{code} - Atlantis species codes
 #',\code{maxObsWeight} - a value (g) indicating the maximum weight the species should weigh,
 #'\code{maxObsLength} - a value (cm) indicating the maximum length the species should grow to.
@@ -34,8 +34,8 @@
 #'\item{passL}{Boolean indicating whether species maximum length (from Atlantis) falls below max observed length}
 #'\item{ratioL}{ratio of atlantis max length to observed max length}
 #'
-#'@export
 #'
+#'@export
 
 
 
