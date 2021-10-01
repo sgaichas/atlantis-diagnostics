@@ -77,7 +77,7 @@ diag_persistence <- function(modelBiomass, speciesCodes=NULL, nYrs = NULL, floor
   # For each species calculate which time steps biomass is below persistence threshold
   # we look at biomass < % initial Biomass
   status <- modelBiomass %>%
-    dplyr::filter(.data$code %in% .data$speciesCodes) %>%
+    dplyr::filter(.data$code %in% speciesCodes) %>%
     dplyr::select(.data$code,.data$species, .data$time, .data$atoutput) %>%
     dplyr::group_by(.data$code) %>%
     dplyr::mutate(initialBiomass = dplyr::first(.data$atoutput)) %>%
