@@ -2,7 +2,7 @@
 
 <!-- badges: start -->
 
-![gitleaks](https://github.com/NOAA-EDAB/atlantisdiagnostics/workflows/gitleaks/badge.svg) ![Install on windows](https://github.com/NOAA-EDAB/atlantisdiagnostics/actions/workflows/runPlatform.yml/badge.svg) ![deploy to github pages](https://github.com/NOAA-EDAB/atlantisdiagnostics/actions/workflows/pkgdown.yml/badge.svg)
+![gitleaks](https://github.com/NOAA-EDAB/atlantisdiagnostics/workflows/gitleaks/badge.svg) ![Install on windows](https://github.com/NOAA-EDAB/atlantisdiagnostics/actions/workflows/runPlatform.yml/badge.svg) ![gh-pahes](https://github.com/NOAA-EDAB/atlantisdiagnostics/actions/workflows/pkgdown.yml/badge.svg)
 
 [![R-CMD-check](https://github.com/NOAA-EDAB/atlantisdiagnostics/workflows/R-CMD-check/badge.svg)](https://github.com/NOAA-EDAB/atlantisdiagnostics/actions)
 <!-- badges: end -->
