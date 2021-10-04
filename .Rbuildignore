@@ -7,3 +7,4 @@ other
 pkgdown
 docs
 test
+^\.github$
