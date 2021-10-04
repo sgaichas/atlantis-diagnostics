@@ -122,23 +122,26 @@ bounds it is flagged. The term "reasonable" is based on survey data when availab
     </div>
 
     <pre class="usage"><span class='fu'>diag_reasonability</span><span class='op'>(</span>
-  <span class='va'>modelBiomass</span>,
+  <span class='va'>fgs</span>,
+  <span class='va'>biomind</span>,
   initialYr <span class='op'>=</span> <span class='fl'>1964</span>,
   speciesCodes <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>realBiomass</span>,
   nYrs <span class='op'>=</span> <span class='cn'>NULL</span>,
   surveyBounds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>1</span><span class='op'>)</span>,
-  initBioBounds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.5</span>, <span class='fl'>10</span><span class='op'>)</span>,
-  plot <span class='op'>=</span> <span class='cn'>F</span>
+  initBioBounds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.5</span>, <span class='fl'>10</span><span class='op'>)</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>modelBiomass</th>
-      <td><p>A data frame. Total biomass of all groups over time, read in from
-Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></td>
+      <th>fgs</th>
+      <td><p>A character string. Path to location of functional groups file.</p></td>
+    </tr>
+    <tr>
+      <th>biomind</th>
+      <td><p>A character string. Path to the BiomIndx.txt file.</p></td>
     </tr>
     <tr>
       <th>initialYr</th>
@@ -169,11 +172,6 @@ For example (Default = c(1,1)) indicating use of min and max of observed biomass
       <th>initBioBounds</th>
       <td><p>Numeric vector. Size of 1x2 containing lower and upper bound proportions used to scale initial biomass.
 This is used for groups/species that dont have surveys</p></td>
-    </tr>
-    <tr>
-      <th>plot</th>
-      <td><p>A logical value specifying if the function should generate plots or
-not. (Default = F). NOT YET IMPLEMENTED</p></td>
     </tr>
     </table>
 
@@ -206,11 +204,10 @@ then survey data is used to assess reasonability. Otherwise deviations from init
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 <span class='co'># Declare paths to files required</span>
-<span class='va'>biol.file</span> <span class='op'>&lt;-</span> <span class='st'>"neus_outputBiomIndx.txt"</span>
-<span class='va'>file_fgs</span> <span class='op'>&lt;-</span> <span class='st'>"neus_groups.csv"</span>
-<span class='co'># use atlantisom to read them in</span>
-<span class='va'>fgs</span> <span class='op'>&lt;-</span> <span class='fu'>atlantisom</span><span class='fu'>::</span><span class='fu'>load_fgs</span><span class='op'>(</span><span class='va'>inDir</span>,<span class='va'>file_fgs</span><span class='op'>)</span>
-<span class='va'>modelBiomass</span> <span class='op'>&lt;-</span> <span class='fu'>atlantisom</span><span class='fu'>::</span><span class='fu'>load_bioind</span><span class='op'>(</span><span class='va'>outDir</span>,<span class='va'>biol.file</span>,<span class='va'>fgs</span><span class='op'>)</span>
+
+<span class='va'>biomind</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Full path to file"</span>,<span class='st'>"xxxBiomIndx.txt"</span><span class='op'>)</span>
+<span class='va'>fgs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Full path to file"</span>,<span class='st'>"functionalGroups.csv"</span><span class='op'>)</span>
+
 <span class='co'># read in survey biomass and convert to metric tons</span>
 <span class='va'>realBiomass</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>readRDS</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='va'>dataDir</span>,<span class='st'>"sweptAreaBiomassNEUS.rds"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
       <span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>variable</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"tot.biomass"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
@@ -221,11 +218,11 @@ then survey data is used to assess reasonability. Otherwise deviations from init
 <span class='co'># Allow species with data to be bounded by 100 x max observed biomass and 1 x min observed biomass.</span>
 <span class='co'># For species without data allow model biomass to lie between 0.5 and 2 times initial biomass</span>
 
-<span class='fu'>diag_reasonability</span><span class='op'>(</span>modelBiomass<span class='op'>=</span><span class='va'>modelBiomass</span>, initialYr <span class='op'>=</span> <span class='fl'>1964</span>, realBiomass<span class='op'>=</span><span class='va'>realBiomass</span>,
+<span class='fu'>diag_reasonability</span><span class='op'>(</span><span class='va'>fgs</span>, <span class='va'>biomind</span>, initialYr <span class='op'>=</span> <span class='fl'>1964</span>, realBiomass<span class='op'>=</span><span class='va'>realBiomass</span>,
 surveyBounds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>,<span class='fl'>100</span><span class='op'>)</span>, initBioBounds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.5</span>,<span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='co'># Only perform test on herring and white hake.</span>
-<span class='fu'>diag_reasonability</span><span class='op'>(</span>modelBiomass<span class='op'>=</span><span class='va'>modelBiomass</span>, initialYr <span class='op'>=</span> <span class='fl'>1964</span>, speciesCodes <span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"MAK"</span>,<span class='st'>"WHK"</span><span class='op'>)</span>,
+<span class='fu'>diag_reasonability</span><span class='op'>(</span><span class='va'>fgs</span>, <span class='va'>biomind</span>, initialYr <span class='op'>=</span> <span class='fl'>1964</span>, speciesCodes <span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"MAK"</span>,<span class='st'>"WHK"</span><span class='op'>)</span>,
  realBiomass<span class='op'>=</span><span class='va'>realBiomass</span>, surveyBounds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>,<span class='fl'>100</span><span class='op'>)</span>, initBioBounds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.5</span>,<span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 <span class='op'>}</span>
 </div></pre>

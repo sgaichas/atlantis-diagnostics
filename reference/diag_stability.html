@@ -124,21 +124,24 @@ stable level (measured as having tolerable trend in a defined time range).</p>
     </div>
 
     <pre class="usage"><span class='fu'>diag_stability</span><span class='op'>(</span>
-  <span class='va'>modelBiomass</span>,
+  <span class='va'>fgs</span>,
+  <span class='va'>biomind</span>,
   initialYr <span class='op'>=</span> <span class='fl'>1964</span>,
   <span class='va'>speciesCodes</span>,
   nYrs <span class='op'>=</span> <span class='fl'>20</span>,
-  relChangeThreshold <span class='op'>=</span> <span class='fl'>0.01</span>,
-  plot <span class='op'>=</span> <span class='cn'>F</span>
+  relChangeThreshold <span class='op'>=</span> <span class='fl'>0.01</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>modelBiomass</th>
-      <td><p>A data frame. Total biomass of all groups over time, read in from
-Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></td>
+      <th>fgs</th>
+      <td><p>A character string. Path to location of functional groups file.</p></td>
+    </tr>
+    <tr>
+      <th>biomind</th>
+      <td><p>A character string. Path to the BiomIndx.txt file.</p></td>
     </tr>
     <tr>
       <th>initialYr</th>
@@ -157,10 +160,6 @@ Atlantis ...BioInd.txt output using <code>atlantisom::load_bioind</code>.</p></t
     <tr>
       <th>relChangeThreshold</th>
       <td><p>Numeric Scalar. Maximum magnitude of relative change of slope (Default = 0.01)</p></td>
-    </tr>
-    <tr>
-      <th>plot</th>
-      <td><p>Logical. Specifying whether the function should generate plots or not. (Default is F).</p></td>
     </tr>
     </table>
 
