@@ -14,8 +14,6 @@
 #'are measured against. (Default = 0.1, all species need to be above 10% of initial biomass). Range should be 0-1
 #'@param display Boolean. Flag to indicate whether to return only species that pass the test, fail the test, or all species (Default = NULL)
 #'@param tol Numeric scalar. Tolerance level to add to biomass floor (Default = 1E-6)
-#'@param plot A logical value specifying if the function should generate plots or
-#'not. (Default = F).
 #'
 #'
 #'@return Returns a data frame of species which do not meet defined persistence criteria.
@@ -59,33 +57,13 @@ diag_persistence <- function(fgs,
                              nYrs = NULL,
                              floor = 0.1,
                              display=NULL,
-                             tol = 1E-6,
-                             plot=F){
+                             tol = 1E-6){
 
-  # get species codes
-  allCodes <- atlantistools::get_turnedon_acronyms(fgs)
-  if(!is.null(speciesCodes)) { # user supplied codes
-    # check to see if codes are valid model codes
-    invalidCodes <- base::setdiff(speciesCodes,allCodes)
-    if (!(length(invalidCodes)==0)){
-      stop("Invalid Atlantis group codes: ",paste0(invalidCodes,collapse=", "))
-    }
-  } else { # use all codes
-    speciesCodes <- allCodes
-  }
 
-  # Need common name of species for output. read in fgs file and select common name and code
-  functionalGps <- atlantistools::load_fgs(fgs)
-  speciesNames <- functionalGps %>%
-    dplyr::select(Code,Name)
-
-  # get biomass from biomIndx file
-  modelBiomass <- atlantistools::load_txt(biomind)  %>%
-    dplyr::filter(.data$code %in% speciesCodes) %>%
-    dplyr::left_join(., speciesNames, by=c("code"="Code")) %>%
-    dplyr::rename(species = .data$Name) %>%
-    dplyr::relocate(.data$species, .before = .data$time) %>%
-    dplyr::arrange(.data$species,.data$time)
+  # read in biomass data and qualify species Codes
+  biom <- get_model_biomass(fgs,biomind,speciesCodes)
+  modelBiomass <- biom$modelBiomass
+  speciesCodes <- biom$speciesCodes
 
   # find final time step value
   maxRuntime <- max(modelBiomass$time)

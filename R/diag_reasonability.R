@@ -3,8 +3,8 @@
 #' Inspects each time point. If at any point in time a species falls below or rises above predefined
 #' bounds it is flagged. The term "reasonable" is based on survey data when available.
 #'
-#'@param modelBiomass A data frame. Total biomass of all groups over time, read in from
-#'Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.
+#'@param fgs A character string. Path to location of functional groups file.
+#'@param biomind A character string. Path to the BiomIndx.txt file.
 #'@param initialYr Numeric Scalar. Year in which the model run was initiated. (Default = 1964)
 #'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for reasonableness
 #'(Default = NULL, uses all species found in  \code{modelBiomass}. Species codes should be a subset of the Atlantis species codes
@@ -17,8 +17,6 @@
 #'For example (Default = c(1,1)) indicating use of min and max of observed biomass
 #'@param initBioBounds Numeric vector. Size of 1x2 containing lower and upper bound proportions used to scale initial biomass.
 #'This is used for groups/species that dont have surveys
-#'@param plot A logical value specifying if the function should generate plots or
-#'not. (Default = F). NOT YET IMPLEMENTED
 #'
 #'
 #'@return Returns a data frame of species
@@ -51,12 +49,11 @@
 #'
 #'@examples
 #'\dontrun{
-#' # Declare paths to files required
-#' biol.file <- "neus_outputBiomIndx.txt"
-#' file_fgs <- "neus_groups.csv"
-#' # use atlantisom to read them in
-#' fgs <- atlantisom::load_fgs(inDir,file_fgs)
-#' modelBiomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
+#'# Declare paths to files required
+#'
+#' biomind <- paste("Full path to file","xxxBiomIndx.txt")
+#' fgs <- paste("Full path to file","functionalGroups.csv")
+#'
 #' # read in survey biomass and convert to metric tons
 #' realBiomass <- readRDS(paste0(dataDir,"sweptAreaBiomassNEUS.rds")) %>%
 #'       dplyr::filter(variable %in% c("tot.biomass")) %>%
@@ -67,29 +64,30 @@
 #' # Allow species with data to be bounded by 100 x max observed biomass and 1 x min observed biomass.
 #' # For species without data allow model biomass to lie between 0.5 and 2 times initial biomass
 #'
-#' diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, realBiomass=realBiomass,
+#' diag_reasonability(fgs, biomind, initialYr = 1964, realBiomass=realBiomass,
 #' surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 #'
 #' # Only perform test on herring and white hake.
-#' diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, speciesCodes =c("MAK","WHK"),
+#' diag_reasonability(fgs, biomind, initialYr = 1964, speciesCodes =c("MAK","WHK"),
 #'  realBiomass=realBiomass, surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 #'}
 
-diag_reasonability <- function(modelBiomass,
+diag_reasonability <- function(fgs,
+                               biomind,
                                initialYr=1964,
                                speciesCodes=NULL,
                                realBiomass,
                                nYrs = NULL,
                                surveyBounds = c(1,1),
-                               initBioBounds = c(0.5,10),
-                               plot=F){
+                               initBioBounds = c(0.5,10)){
 
   ################################################
   ########### model output #######################
   ################################################
-
-  # check for valid species Codes & clean
-  speciesCodes <- check_species_codes(modelBiomass,speciesCodes)
+  # read in biomass data and qualify species Codes
+  biom <- get_model_biomass(fgs,biomind,speciesCodes)
+  modelBiomass <- biom$modelBiomass
+  speciesCodes <- biom$speciesCodes
 
   # list of Atlantis species and Atlantis codes. Pulled from model output
   species <- modelBiomass %>%
@@ -114,7 +112,7 @@ diag_reasonability <- function(modelBiomass,
     dplyr::summarise(modelBiomass = mean(.data$value),.groups="drop") %>%
     dplyr::mutate(year = .data$yearStep+initialYr,yearStep=NULL) %>%
     dplyr::ungroup() %>%
-    dplyr::left_join(.data,initialBiomass,by=c("code","species"))
+    dplyr::left_join(.,initialBiomass,by=c("code","species"))
 
   ################################################
   ############## observed data ###################
@@ -137,7 +135,7 @@ diag_reasonability <- function(modelBiomass,
   speciesBiomass <- speciesBiomass %>%
     dplyr::group_by(.data$year,.data$variable,.data$code) %>%
     dplyr::summarise(realBiomass = sum(.data$value),nSpecies = dplyr::n(),.groups="drop") %>%
-    tidyr::pivot_wider(.data,names_from = .data$variable,values_from = .data$realBiomass)
+    tidyr::pivot_wider(.,names_from = .data$variable,values_from = .data$realBiomass)
 
   # find final year of model run
   maxRuntime <- max(modelBiomass$year)
@@ -192,7 +190,7 @@ diag_reasonability <- function(modelBiomass,
       mb <- modelBiomass %>%
         dplyr::filter(.data$code == acode) %>%
         dplyr::filter(.data$year > filterTime) %>%
-        dplyr::left_join(.data,rb,by=c("code"="code","year"="year")) %>%
+        dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
         dplyr::mutate(reasonable = (.data$modelBiomass < max(.data$tot.biomass)*surveyBounds[2]) &
                         (.data$modelBiomass > min(.data$tot.biomass)*surveyBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(.data$tot.biomass,.data$modelBiomass)$mef) %>%
@@ -223,7 +221,7 @@ diag_reasonability <- function(modelBiomass,
         dplyr::mutate(tn = NA) %>%
         dplyr::mutate(nts = 0) %>%
         dplyr::mutate(pass = T) %>%
-        dplyr::mutate(test = .data$test)
+        dplyr::mutate(test = test)
     } else { # some failure
       out <- mb %>%
         dplyr::filter(.data$reasonable == F) %>%
@@ -233,7 +231,7 @@ diag_reasonability <- function(modelBiomass,
                         .data$propInitBio,.data$propBelowLower,.data$propAboveUpper,.data$maxExceedance) %>%
         dplyr::summarize(nts = sum(!.data$reasonable),.groups="drop") %>%
         dplyr::mutate(pass = dplyr::if_else(.data$nts>0,F,T)) %>%
-        dplyr::mutate(test = .data$test)
+        dplyr::mutate(test = test)
 
     }
 

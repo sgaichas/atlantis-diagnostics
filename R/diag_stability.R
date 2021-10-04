@@ -5,16 +5,14 @@
 #'stable level (measured as having tolerable trend in a defined time range).
 #'
 #'
-#'@param modelBiomass A data frame. Total biomass of all groups over time, read in from
-#'Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.
+#'@param fgs A character string. Path to location of functional groups file.
+#'@param biomind A character string. Path to the BiomIndx.txt file.
 #'@param initialYr Numeric Scalar. Year in which the model run was initiated. (Default = 1964)
 #'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for stability.
 #'(Default = NULL, uses all species found in  \code{modelBiomass})
 #'@param nYrs Numeric scalar. Number of years from the end of the time series that stability must occur.
 #' (Default = 20 years)
 #'@param relChangeThreshold Numeric Scalar. Maximum magnitude of relative change of slope (Default = 0.01)
-#'@param plot Logical. Specifying whether the function should generate plots or not. (Default is F).
-#'
 #'
 #'@return Returns a data frame of all species and how they measure up against the stability criterion
 #'\item{code}{Atlantis Code for species/functional group}
@@ -48,25 +46,30 @@
 #'@examples
 #'\dontrun{
 #'# Declare paths to files required
-#' biol.file <- "neus_outputBiomIndx.txt"
-#' file_fgs <- "neus_groups.csv"
-#' # use atlantisom to read them in
-#' fgs <- atlantisom::load_fgs(inDir,file_fgs)
-#' modelBiomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
+#'
+#' biomind <- paste("Full path to file","xxxBiomIndx.txt")
+#' fgs <- paste("Full path to file","functioalGgroups.csv")
 #'
 #' # Perform stability test on all species/groups using the last 20 years of the run
-#' diag_stability(modelBiomass, nYrs = 20)
+#' diag_stability(fgs, biomind, nYrs = 20)
 #'
 #' # Only perform test on herring and white hake.
-#' # Require stability over the last 10 years of the run and and use alpha = 0.1 as
-#' tests significance level
-#' diag_stability(modelBiomass, speciesCodes=c("HER","WHK"), nYrs = 10, relChangeThreshold = 0.01)
+#' # Require stability over the last 10 years of the run and and use a
+#' relative change in the slope = 0.01 as the criterion for pass or fail
+#' diag_stability(fgs,biomind, speciesCodes=c("HER","WHK"), nYrs = 10, relChangeThreshold = 0.01)
 #'}
 
-diag_stability <- function(modelBiomass, initialYr = 1964, speciesCodes, nYrs = 20, relChangeThreshold = 0.01, plot=F){
+diag_stability <- function(fgs,
+                           biomind,
+                           initialYr = 1964,
+                           speciesCodes,
+                           nYrs = 20,
+                           relChangeThreshold = 0.01){
 
-  # check for valid species Codes & clean
-  speciesCodes <- check_species_codes(modelBiomass,speciesCodes)
+  # read in biomass data and qualify species Codes
+  biom <- get_model_biomass(fgs,biomind,speciesCodes)
+  modelBiomass <- biom$modelBiomass
+  speciesCodes <- biom$speciesCodes
 
   # determine time frame in which to perform "test"
   # filter model biomass and average over the year
