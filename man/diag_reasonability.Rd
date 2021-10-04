@@ -5,19 +5,20 @@
 \title{Test for functional group reasonability}
 \usage{
 diag_reasonability(
-  modelBiomass,
+  fgs,
+  biomind,
   initialYr = 1964,
   speciesCodes = NULL,
   realBiomass,
   nYrs = NULL,
   surveyBounds = c(1, 1),
-  initBioBounds = c(0.5, 10),
-  plot = F
+  initBioBounds = c(0.5, 10)
 )
 }
 \arguments{
-\item{modelBiomass}{A data frame. Total biomass of all groups over time, read in from
-Atlantis ...BioInd.txt output using \code{atlantisom::load_bioind}.}
+\item{fgs}{A character string. Path to location of functional groups file.}
+
+\item{biomind}{A character string. Path to the BiomIndx.txt file.}
 
 \item{initialYr}{Numeric Scalar. Year in which the model run was initiated. (Default = 1964)}
 
@@ -36,9 +37,6 @@ For example (Default = c(1,1)) indicating use of min and max of observed biomass
 
 \item{initBioBounds}{Numeric vector. Size of 1x2 containing lower and upper bound proportions used to scale initial biomass.
 This is used for groups/species that dont have surveys}
-
-\item{plot}{A logical value specifying if the function should generate plots or
-not. (Default = F). NOT YET IMPLEMENTED}
 }
 \value{
 Returns a data frame of species
@@ -68,11 +66,10 @@ bounds it is flagged. The term "reasonable" is based on survey data when availab
 \examples{
 \dontrun{
 # Declare paths to files required
-biol.file <- "neus_outputBiomIndx.txt"
-file_fgs <- "neus_groups.csv"
-# use atlantisom to read them in
-fgs <- atlantisom::load_fgs(inDir,file_fgs)
-modelBiomass <- atlantisom::load_bioind(outDir,biol.file,fgs)
+
+biomind <- paste("Full path to file","xxxBiomIndx.txt")
+fgs <- paste("Full path to file","functionalGroups.csv")
+
 # read in survey biomass and convert to metric tons
 realBiomass <- readRDS(paste0(dataDir,"sweptAreaBiomassNEUS.rds")) \%>\%
       dplyr::filter(variable \%in\% c("tot.biomass")) \%>\%
@@ -83,11 +80,11 @@ realBiomass <- readRDS(paste0(dataDir,"sweptAreaBiomassNEUS.rds")) \%>\%
 # Allow species with data to be bounded by 100 x max observed biomass and 1 x min observed biomass.
 # For species without data allow model biomass to lie between 0.5 and 2 times initial biomass
 
-diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, realBiomass=realBiomass,
+diag_reasonability(fgs, biomind, initialYr = 1964, realBiomass=realBiomass,
 surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 
 # Only perform test on herring and white hake.
-diag_reasonability(modelBiomass=modelBiomass, initialYr = 1964, speciesCodes =c("MAK","WHK"),
+diag_reasonability(fgs, biomind, initialYr = 1964, speciesCodes =c("MAK","WHK"),
  realBiomass=realBiomass, surveyBounds = c(1,100), initBioBounds = c(0.5,2))
 }
 }

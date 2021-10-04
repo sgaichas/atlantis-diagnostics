@@ -11,8 +11,7 @@ diag_persistence(
   nYrs = NULL,
   floor = 0.1,
   display = NULL,
-  tol = 1e-06,
-  plot = F
+  tol = 1e-06
 )
 }
 \arguments{
@@ -32,9 +31,6 @@ are measured against. (Default = 0.1, all species need to be above 10\% of initi
 \item{display}{Boolean. Flag to indicate whether to return only species that pass the test, fail the test, or all species (Default = NULL)}
 
 \item{tol}{Numeric scalar. Tolerance level to add to biomass floor (Default = 1E-6)}
-
-\item{plot}{A logical value specifying if the function should generate plots or
-not. (Default = F).}
 }
 \value{
 Returns a data frame of species which do not meet defined persistence criteria.

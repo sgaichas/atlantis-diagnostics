@@ -101,19 +101,18 @@ diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCo
     dplyr::mutate(biomass = 1E6*.data$biomass)
 
   # join numbers with biomass and calculate mean weight of an individivual in age, polygon, layer, time
-  jj <- spatialNumbers %>% dplyr::left_join(.data,spatialBiomass,by = c("species", "agecl", "polygon", "layer", "time")) %>%
+  jj <- spatialNumbers %>% dplyr::left_join(.,spatialBiomass,by = c("species", "agecl", "polygon", "layer", "time")) %>%
     dplyr::filter(!is.na(.data$biomass)) %>%
     dplyr::mutate(meanWeight = .data$biomass/.data$numbers)
 
   # select time and space where max occurs
   boxlayer <- jj %>% dplyr::group_by(.data$species,.data$polygon,.data$agecl, .data$time) %>%
-    dplyr::summarise(maxMeanWeight = max(.data$meanWeight),.groups="drop") %>%
-    dplyr::rename(code = .data$Code)
+    dplyr::summarise(maxMeanWeight = max(.data$meanWeight),.groups="drop")
   maxVal <- boxlayer %>%
     dplyr::group_by(.data$species) %>%
     dplyr::summarise(maxVal = max(.data$maxMeanWeight),.groups="drop")
   boxlayer <- boxlayer %>%
-    dplyr::left_join(.data,maxVal,by = "species") %>%
+    dplyr::left_join(.,maxVal,by = "species") %>%
     dplyr::filter(.data$maxMeanWeight == .data$maxVal) %>%
     dplyr::select(-.data$maxVal)
 
@@ -122,18 +121,18 @@ diag_maxsize <- function(nc,bgm,init,fgs,prm_run,prm_biol,speciesStats,speciesCo
   # note: estimating L from W using this relationship is incorrect
   lenWeightParams <- atlantistools::prm_to_df(prm_biol,fgs,group = groups.age.acronym,parameter = c("li_a","li_b"))
 
-
   # find the maximum weight for each species compare to large fish values from speciesStats
   # do the same for the maximum length using Weight-length relationship
   largeFish <- boxlayer %>%
-    dplyr::left_join(.data,speciesLookup,by=c("species"="LongName")) %>%
-    dplyr::left_join(.data,speciesStats,by = "code") %>%
+    dplyr::left_join(.,speciesLookup,by=c("species"="LongName")) %>%
+    dplyr::rename(code = .data$Code) %>%
+    dplyr::left_join(.,speciesStats,by = "code") %>%
     dplyr::mutate(passW = ifelse(.data$maxMeanWeight < .data$maxObsWeight,TRUE,FALSE)) %>%
-    dplyr::select(-.data$scientificName,-.data$Common_Name) %>%
-    dplyr::relocate(.data$Code,.after = .data$species) %>%
+    #dplyr::select(-.data$scientificName,-.data$Common_Name) %>%
+    dplyr::relocate(.data$code,.after = .data$species) %>%
     dplyr::relocate(.data$maxMeanWeight, .before = .data$maxObsWeight) %>%
     dplyr::mutate(ratioW = .data$maxMeanWeight/.data$maxObsWeight) %>%
-    dplyr::left_join(.data,lenWeightParams,by = "species") %>%
+    dplyr::left_join(.,lenWeightParams,by = "species") %>%
     dplyr::mutate(maxLength = (.data$maxMeanWeight/.data$li_a)^(1/.data$li_b)) %>%
     dplyr::select(-.data$li_a,-.data$li_b) %>%
     dplyr::relocate(.data$maxLength,.after = .data$time) %>%
