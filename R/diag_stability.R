@@ -55,7 +55,7 @@
 #'
 #' # Only perform test on herring and white hake.
 #' # Require stability over the last 10 years of the run and and use a
-#' relative change in the slope = 0.01 as the criterion for pass or fail
+#' # relative change in the slope = 0.01 as the criterion for pass or fail
 #' diag_stability(fgs,biomind, speciesCodes=c("HER","WHK"), nYrs = 10, relChangeThreshold = 0.01)
 #'}
 
