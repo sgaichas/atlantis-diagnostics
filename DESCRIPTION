@@ -40,15 +40,11 @@ Imports:
     dplyr,
     ggplot2,
     magrittr,
-    ggthemes,
-    ggforce,
     purrr,
     tidyr,
     atlantistools,
     rlang
 Remotes:
-    andybeet/atlantistools,
-    r4atlantis/atlantisom,
-    NOAA-EDAB/atlantisdrive
+    andybeet/atlantistools
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
