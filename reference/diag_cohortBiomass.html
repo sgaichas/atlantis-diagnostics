@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • atlantisdiagnostics</title>
+<title>Test for distribution of biomass over age class — diag_cohortBiomass • atlantisdiagnostics</title>
 
 
 <!-- jquery -->
@@ -41,7 +41,10 @@
   <link href="../extra.css" rel="stylesheet">
   
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Test for distribution of biomass over age class — diag_cohortBiomass" />
+<meta property="og:description" content="Determine which age classes contain the most biomass and compare to neighboring
+age classes. A species fails the test is all biomass is contained in either
+the smallest or largest age class" />
 
 
 
@@ -60,7 +63,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -107,72 +110,51 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Test for distribution of biomass over age class</h1>
+    <small class="dont-index">Source: <a href='https://github.com/NOAA-EDAB/atlantisdiagnostics/blob/master/R/diag_cohortBiomass.r'><code>R/diag_cohortBiomass.r</code></a></small>
+    <div class="hidden name"><code>diag_cohortBiomass.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Determine which age classes contain the most biomass and compare to neighboring
+age classes. A species fails the test is all biomass is contained in either
+the smallest or largest age class</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>diag_cohortBiomass</span><span class='op'>(</span><span class='va'>mortFile</span>, <span class='va'>agebiomind</span>, <span class='va'>neusPriority</span><span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="diag_cohortBiomass.html">diag_cohortBiomass()</a></code> </p>
-        </td>
-        <td><p>Test for distribution of biomass over age class</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="diag_combine.html">diag_combine()</a></code> </p>
-        </td>
-        <td><p>Combine all diagnostic output</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="diag_maxsize.html">diag_maxsize()</a></code> </p>
-        </td>
-        <td><p>Test for max fish size</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="diag_persistence.html">diag_persistence()</a></code> </p>
-        </td>
-        <td><p>Test for functional group persistence</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="diag_reasonability.html">diag_reasonability()</a></code> </p>
-        </td>
-        <td><p>Test for functional group reasonability</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="diag_stability.html">diag_stability()</a></code> </p>
-        </td>
-        <td><p>Test for functional group stability</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>mortFile</th>
+      <td><p>A character string. Path to location of Mort.txt file.</p></td>
+    </tr>
+    <tr>
+      <th>agebiomind</th>
+      <td><p>A character string. Path to location of AgeBiomIndx file.</p></td>
+    </tr>
+    <tr>
+      <th>neusPriority</th>
+      <td><p>A character string. Path to location of Species Priorities file.</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    
+
+<dt>Code</dt><dd><p>Atlantis species code</p></dd>
+<dt>Status</dt><dd><p>Boolean indicating whether species passes test</p></dd>
+<dt>Max_Cohort</dt><dd><p>Age class with the highes biomass</p></dd>
+<dt>Stability</dt><dd><p></p></dd>
+<dt>Priority</dt><dd><p>Scale defining priority of species in the model</p></dd>
+<dt>Fishing</dt><dd><p>Scale defining level of fishing, 1 is highest</p></dd>
+
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
