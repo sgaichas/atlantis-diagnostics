@@ -45,6 +45,6 @@ Imports:
     atlantistools,
     rlang
 Remotes:
-    andybeet/atlantistools
+    Atlantis-Ecosystem-Model/atlantistools
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
