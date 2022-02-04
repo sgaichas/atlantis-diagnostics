@@ -172,8 +172,8 @@ diag_reasonability <- function(fgs,
         dplyr::mutate(reasonable = (.data$modelBiomass < .data$initialBiomass*initBioBounds[2]) &
                         (.data$modelBiomass >= .data$initialBiomass*initBioBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(.data$modelBiomass,.data$initialBiomass)$mef) %>%
-        dplyr::mutate(minBiomass = min(.data$modelBiomass)) %>%
-        dplyr::mutate(maxBiomass = max(.data$modelBiomass)) %>%
+        dplyr::mutate(minBiomass = min(.data$modelBiomass,na.rm=T)) %>%
+        dplyr::mutate(maxBiomass = max(.data$modelBiomass,na.rm=T)) %>%
         dplyr::mutate(propInitBio = .data$maxBiomass/.data$initialBiomass) %>%
         dplyr::mutate(propAboveUpper = .data$maxBiomass/(.data$initialBiomass*initBioBounds[2]) - 1) %>%
         dplyr::mutate(propBelowLower = -.data$minBiomass/(.data$initialBiomass*initBioBounds[1]) + 1) %>%
@@ -191,14 +191,14 @@ diag_reasonability <- function(fgs,
         dplyr::filter(.data$code == acode) %>%
         dplyr::filter(.data$year > filterTime) %>%
         dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
-        dplyr::mutate(reasonable = (.data$modelBiomass < max(.data$tot.biomass)*surveyBounds[2]) &
-                        (.data$modelBiomass > min(.data$tot.biomass)*surveyBounds[1])) %>%
+        dplyr::mutate(reasonable = (.data$modelBiomass < max(.data$tot.biomass,na.rm=T)*surveyBounds[2]) &
+                        (.data$modelBiomass > min(.data$tot.biomass,na.rm=T)*surveyBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(.data$tot.biomass,.data$modelBiomass)$mef) %>%
         dplyr::mutate(minBiomass = min(.data$modelBiomass)) %>%
         dplyr::mutate(maxBiomass = max(.data$modelBiomass)) %>%
         dplyr::mutate(propInitBio = .data$maxBiomass/.data$initialBiomass) %>%
-        dplyr::mutate(propAboveUpper = .data$maxBiomass/(max(.data$tot.biomass)*surveyBounds[2]) - 1) %>%
-        dplyr::mutate(propBelowLower = -.data$minBiomass/(min(.data$tot.biomass)*surveyBounds[1]) + 1) %>%
+        dplyr::mutate(propAboveUpper = .data$maxBiomass/(max(.data$tot.biomass,na.rm=T)*surveyBounds[2]) - 1) %>%
+        dplyr::mutate(propBelowLower = -.data$minBiomass/(min(.data$tot.biomass,na.rm=T)*surveyBounds[1]) + 1) %>%
         dplyr::group_by(.data$code) %>%
         dplyr::mutate(maxExceedance = max(.data$propBelowLower,.data$propAboveUpper)) %>%
         dplyr::ungroup()
