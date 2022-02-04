@@ -4,8 +4,11 @@
 #' age classes. A species fails the test is all biomass is contained in either
 #' the smallest or largest age class
 #'
-#'@param mortFile A character string. Path to location of Mort.txt file.
+#'@param fgs A character string. Path to location of functional groups file.
+#'@param mortality A character string. Path to location of Mort.txt file.
 #'@param agebiomind A character string. Path to location of AgeBiomIndx file.
+#'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for persistence.
+#'(Default = NULL, uses all species with \code{IsTurnedOn=1} in \code{fgs} file)
 #'@param neusPriority A character string. Path to location of Species Priorities file.
 #'
 #'@return
@@ -18,10 +21,28 @@
 #'
 #' @export
 
-diag_cohortBiomass <- function(mortFile,agebiomind,neusPriority) {
+diag_cohortBiomass <- function(fgs,
+                               mortality,
+                               agebiomind,
+                               speciesCodes = NULL,
+                               neusPriority) {
+
+
+  # get species codes
+  allCodes <- atlantistools::get_turnedon_acronyms(fgs)
+  if(!is.null(speciesCodes)) { # user supplied codes
+    # check to see if codes are valid model codes
+    invalidCodes <- base::setdiff(speciesCodes,allCodes)
+    if (!(length(invalidCodes)==0)){
+      stop("Invalid Atlantis group codes: ",paste0(invalidCodes,collapse=", "))
+    }
+  } else { # use all codes
+    speciesCodes <- allCodes
+  }
+
 
   cohortBiom <- read.csv(agebiomind,sep = " ", stringsAsFactors=FALSE, header=TRUE)
-  mort <- read.csv(mortFile,sep = " ", stringsAsFactors=FALSE, header=TRUE)
+  mort <- read.csv(mortality,sep = " ", stringsAsFactors=FALSE, header=TRUE)
   mort <- dplyr::select(mort,dplyr::contains(".F"))
   mort_l20 <- dplyr::slice(mort,-c(1:34,55))
   meanMort <- dplyr::summarize_all(mort_l20,mean)
@@ -36,8 +57,8 @@ diag_cohortBiomass <- function(mortFile,agebiomind,neusPriority) {
   firstRow <- numRows - 100
   cohortBiom <- dplyr::slice(cohortBiom,firstRow:lastRow)
 
-  Code <- c("MAK","HER","WHK","BLF","WPF","SUF","WIF","WTF", "FOU", "HAL",	"PLA",	"FLA",	"BFT",	"TUN",	"BIL",	"MPF",	"BUT",	"BPF",	"ANC",	"GOO",	"MEN",	"FDE",	"COD",	"SHK",	"OHK",	"POL",	"RHK",	"BSB",	"SCU",	"TYL",	"RED",	"OPT",	"SAL",	"DRM",	"STB",	"TAU",	"WOL",	"SDF",	"FDF",	"HAD",	"YTF",	"DOG",	"SMO")
-  numGroups <- length(Code)
+  #Code <- c("MAK","HER","WHK","BLF","WPF","SUF","WIF","WTF", "FOU", "HAL",	"PLA",	"FLA",	"BFT",	"TUN",	"BIL",	"MPF",	"BUT",	"BPF",	"ANC",	"GOO",	"MEN",	"FDE",	"COD",	"SHK",	"OHK",	"POL",	"RHK",	"BSB",	"SCU",	"TYL",	"RED",	"OPT",	"SAL",	"DRM",	"STB",	"TAU",	"WOL",	"SDF",	"FDF",	"HAD",	"YTF",	"DOG",	"SMO")
+  numGroups <- length(speciesCodes)
 
 
   Max_Cohort <- c()
@@ -45,7 +66,7 @@ diag_cohortBiomass <- function(mortFile,agebiomind,neusPriority) {
   Stability <- c()
 
   for (i in 1:numGroups) {
-    groupName <- Code[i]
+    groupName <- speciesCodes[i]
     groupCohort <- dplyr::select(cohortBiom,contains(groupName))
     groupCohortMean <- dplyr::summarise_each(groupCohort, mean)
     maxCohortMean <- base::which.max(groupCohortMean)
@@ -58,6 +79,7 @@ diag_cohortBiomass <- function(mortFile,agebiomind,neusPriority) {
     maxMeanIndex <- base::which.max(groupCohortMean)
     maxMeanIndex <- maxMeanIndex[[1]]
     stabVal <- groupCohort[100,maxMeanIndex] / groupCohort[5,maxMeanIndex]
+
     if (stabVal < 0.75) {
       Stability <- c(Stability,"  Declining")
     } else if (stabVal > 1.25) {
@@ -68,7 +90,7 @@ diag_cohortBiomass <- function(mortFile,agebiomind,neusPriority) {
   }
 
 
-  diagnostics <- data.frame(Code,Status,Max_Cohort,Stability)
+  diagnostics <- data.frame(Code=speciesCodes,Status,Max_Cohort,Stability)
   diagnostics <- dplyr::inner_join(diagnostics,neusPriority,by="Code")
   diagnostics$Fishing <- "4 - None"
 

@@ -4,12 +4,23 @@
 \alias{diag_cohortBiomass}
 \title{Test for distribution of biomass over age class}
 \usage{
-diag_cohortBiomass(mortFile, agebiomind, neusPriority)
+diag_cohortBiomass(
+  fgs,
+  mortality,
+  agebiomind,
+  speciesCodes = NULL,
+  neusPriority
+)
 }
 \arguments{
-\item{mortFile}{A character string. Path to location of Mort.txt file.}
+\item{fgs}{A character string. Path to location of functional groups file.}
+
+\item{mortality}{A character string. Path to location of Mort.txt file.}
 
 \item{agebiomind}{A character string. Path to location of AgeBiomIndx file.}
+
+\item{speciesCodes}{Character vector. A vector of Atlantis species codes in which to test for persistence.
+(Default = NULL, uses all species with \code{IsTurnedOn=1} in \code{fgs} file)}
 
 \item{neusPriority}{A character string. Path to location of Species Priorities file.}
 }
