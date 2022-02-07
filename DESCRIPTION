@@ -43,7 +43,8 @@ Imports:
     purrr,
     tidyr,
     atlantistools,
-    rlang
+    rlang,
+    tibble
 Remotes:
     Atlantis-Ecosystem-Model/atlantistools
 Roxygen: list(markdown = TRUE)
