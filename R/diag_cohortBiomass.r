@@ -41,16 +41,16 @@ diag_cohortBiomass <- function(fgs,
   }
 
 
-  cohortBiom <- read.csv(agebiomind,sep = " ", stringsAsFactors=FALSE, header=TRUE)
-  mort <- read.csv(mortality,sep = " ", stringsAsFactors=FALSE, header=TRUE)
+  cohortBiom <- utils::read.csv(agebiomind,sep = " ", stringsAsFactors=FALSE, header=TRUE)
+  mort <- utils::read.csv(mortality,sep = " ", stringsAsFactors=FALSE, header=TRUE)
   mort <- dplyr::select(mort,dplyr::contains(".F"))
   mort_l20 <- dplyr::slice(mort,-c(1:34,55))
   meanMort <- dplyr::summarize_all(mort_l20,mean)
 
 
-  neusPriority <- read.csv(neusPriority,sep=",",stringsAsFactors=FALSE,header=TRUE) %>%
+  neusPriority <- utils::read.csv(neusPriority,sep=",",stringsAsFactors=FALSE,header=TRUE) %>%
     dplyr::rename(priority = .data$priority.overall) %>%
-    dplyr::select(code,priority)
+    dplyr::select(.data$code,.data$priority)
 
   numRows <- nrow(cohortBiom)
   lastRow <- numRows - 1
@@ -109,7 +109,7 @@ diag_cohortBiomass <- function(fgs,
   }
 
   diagnostics <- diagnostics %>%
-    dplyr::arrange(priority,pass,maxCohort,stability,fishing,code) %>%
+    dplyr::arrange(.data$priority,.data$pass,.data$maxCohort,.data$stability,.data$fishing,.data$code) %>%
     tibble::as_tibble()
 
   return(diagnostics)
