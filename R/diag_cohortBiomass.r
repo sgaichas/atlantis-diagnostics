@@ -61,7 +61,7 @@ diag_cohortBiomass <- function(fgs,
 
 
   maxCohort <- c()
-  status <- c()
+  pass <- c()
   stability <- c()
 
   for (i in 1:numGroups) {
@@ -71,9 +71,9 @@ diag_cohortBiomass <- function(fgs,
     maxCohortMean <- base::which.max(groupCohortMean)
     maxCohort <- c(maxCohort, maxCohortMean)
     if (maxCohortMean == 1 || maxCohortMean == 10) {
-      status <- c(status,F)
+      pass <- c(pass,F)
     } else {
-      status <- c(status, T)
+      pass <- c(pass, T)
     }
     maxMeanIndex <- base::which.max(groupCohortMean)
     maxMeanIndex <- maxMeanIndex[[1]]
@@ -89,7 +89,7 @@ diag_cohortBiomass <- function(fgs,
   }
 
 
-  diagnostics <- data.frame(code=speciesCodes,status,maxCohort,stability)
+  diagnostics <- data.frame(code=speciesCodes,pass,maxCohort,stability)
   diagnostics <- dplyr::inner_join(diagnostics,neusPriority,by="code")
   diagnostics$fishing <- NULL
 
@@ -108,10 +108,8 @@ diag_cohortBiomass <- function(fgs,
     }
   }
 
-  diagnostics <- dplyr::arrange(diagnostics,priority,status,maxCohort,stability,fishing,code)
-  rownames(diagnostics) <-c()
-
   diagnostics <- diagnostics %>%
+    dplyr::arrange(priority,pass,maxCohort,stability,fishing,code) %>%
     tibble::as_tibble()
 
   return(diagnostics)
