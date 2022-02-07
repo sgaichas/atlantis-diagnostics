@@ -25,15 +25,15 @@ diag_cohortBiomass(
 \item{neusPriority}{A character string. Path to location of Species Priorities file.}
 }
 \value{
-\item{Code}{Atlantis species code}
-\item{Status}{Boolean indicating whether species passes test}
-\item{Max_Cohort}{Age class with the highes biomass}
-\item{Stability}{}
-\item{Priority}{Scale defining priority of species in the model}
-\item{Fishing}{Scale defining level of fishing, 1 is highest}
+\item{code}{Atlantis species code}
+\item{status}{Boolean indicating whether species passes test}
+\item{maxCohort}{Age class with the highes biomass}
+\item{stability}{}
+\item{priority}{Scale defining priority of species in the model, High (H), Low(L) }
+\item{fishing}{Scale defining level of fishing, 1 is highest}
 }
 \description{
 Determine which age classes contain the most biomass and compare to neighboring
-age classes. A species fails the test is all biomass is contained in either
+age classes. A species fails the test if all biomass is contained in either
 the smallest or largest age class
 }
