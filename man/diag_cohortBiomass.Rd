@@ -4,25 +4,36 @@
 \alias{diag_cohortBiomass}
 \title{Test for distribution of biomass over age class}
 \usage{
-diag_cohortBiomass(mortFile, agebiomind, neusPriority)
+diag_cohortBiomass(
+  fgs,
+  mortality,
+  agebiomind,
+  speciesCodes = NULL,
+  neusPriority
+)
 }
 \arguments{
-\item{mortFile}{A character string. Path to location of Mort.txt file.}
+\item{fgs}{A character string. Path to location of functional groups file.}
+
+\item{mortality}{A character string. Path to location of Mort.txt file.}
 
 \item{agebiomind}{A character string. Path to location of AgeBiomIndx file.}
+
+\item{speciesCodes}{Character vector. A vector of Atlantis species codes in which to test for persistence.
+(Default = NULL, uses all species with \code{IsTurnedOn=1} in \code{fgs} file)}
 
 \item{neusPriority}{A character string. Path to location of Species Priorities file.}
 }
 \value{
-\item{Code}{Atlantis species code}
-\item{Status}{Boolean indicating whether species passes test}
-\item{Max_Cohort}{Age class with the highes biomass}
-\item{Stability}{}
-\item{Priority}{Scale defining priority of species in the model}
-\item{Fishing}{Scale defining level of fishing, 1 is highest}
+\item{code}{Atlantis species code}
+\item{status}{Boolean indicating whether species passes test}
+\item{maxCohort}{Age class with the highes biomass}
+\item{stability}{}
+\item{priority}{Scale defining priority of species in the model, High (H), Low(L) }
+\item{fishing}{Scale defining level of fishing, 1 is highest}
 }
 \description{
 Determine which age classes contain the most biomass and compare to neighboring
-age classes. A species fails the test is all biomass is contained in either
+age classes. A species fails the test if all biomass is contained in either
 the smallest or largest age class
 }
