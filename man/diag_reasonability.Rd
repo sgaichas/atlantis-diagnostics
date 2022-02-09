@@ -10,6 +10,7 @@ diag_reasonability(
   initialYr = 1964,
   speciesCodes = NULL,
   realBiomass,
+  useVariance = F,
   nYrs = NULL,
   surveyBounds = c(1, 1),
   initBioBounds = c(0.5, 10)
@@ -26,8 +27,10 @@ diag_reasonability(
 (Default = NULL, uses all species found in  \code{modelBiomass}. Species codes should be a subset of the Atlantis species codes}
 
 \item{realBiomass}{A data frame. biomass time series (from assessments, stock SMART or otherwise) for species.
-CURRENTLY IMPLEMENTED USING SURVDAT DATA ONLY  \code{realBiomass} should be in long format with column labels (YEAR,variable,value,Code,Species,isFishedSpecies)
-Biomass units should be in metric tonnes}
+\code{realBiomass} should be in long format with column labels (YEAR,variable,value,Code,Species,isFishedSpecies)
+variable should contain value = "biomass" (Biomass units should be in metric tonnes) and/or "var" if \code{useVariance = T}}
+
+\item{useVariance}{Boolean. If to use variance estimates of biomass (included in \code{realBiomass}) (Default = F, reverts to using \code{surveyBounds} as upper and lover bounds)}
 
 \item{nYrs}{Numeric scalar. Number of years from the end of the time series for which reasonableness is checked.
 (Default = NULL, entire time series is used)}
