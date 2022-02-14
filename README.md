@@ -2,9 +2,8 @@
 
 <!-- badges: start -->
 
-![gitleaks](https://github.com/NOAA-EDAB/atlantisdiagnostics/workflows/gitleaks/badge.svg)  ![gh-pages](https://github.com/NOAA-EDAB/atlantisdiagnostics/actions/workflows/pkgdown.yml/badge.svg)
+[![gitleaks](https://github.com/NOAA-EDAB/atlantisdiagnostics/workflows/gitleaks/badge.svg)](https://github.com/NOAA-EDAB/atlantisdiagnostics/actions) [![gh-pages](https://github.com/NOAA-EDAB/atlantisdiagnostics/actions/workflows/pkgdown.yml/badge.svg)](https://github.com/NOAA-EDAB/atlantisdiagnostics/actions) [![R-CMD-check](https://github.com/NOAA-EDAB/atlantisdiagnostics/workflows/R-CMD-check/badge.svg)](https://github.com/NOAA-EDAB/atlantisdiagnostics/actions)
 
-[![R-CMD-check](https://github.com/NOAA-EDAB/atlantisdiagnostics/workflows/R-CMD-check/badge.svg)](https://github.com/NOAA-EDAB/atlantisdiagnostics/actions)
 <!-- badges: end -->
 In development.
 

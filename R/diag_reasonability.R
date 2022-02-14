@@ -6,13 +6,15 @@
 #'@param fgs A character string. Path to location of functional groups file.
 #'@param biomind A character string. Path to the BiomIndx.txt file.
 #'@param initialYr Numeric Scalar. Year in which the model run was initiated. (Default = 1964)
+#'@param startYr Numeric Scalar. Year in which the model finishes spin up period. (Default = 1998)
 #'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for reasonableness
 #'(Default = NULL, uses all species found in  \code{modelBiomass}. Species codes should be a subset of the Atlantis species codes
 #'@param realBiomass A data frame. biomass time series (from assessments, stock SMART or otherwise) for species.
-#' CURRENTLY IMPLEMENTED USING SURVDAT DATA ONLY  \code{realBiomass} should be in long format with column labels (YEAR,variable,value,Code,Species,isFishedSpecies)
-#'  Biomass units should be in metric tonnes
+#' \code{realBiomass} should be in long format with column labels (YEAR,variable,value,Code,Species,isFishedSpecies)
+#' variable should contain value = "biomass" (Biomass units should be in metric tonnes) and/or "var" if \code{useVariance = T}
+#'@param useVariance Boolean. If to use variance estimates of biomass (included in \code{realBiomass}) (Default = F, reverts to using \code{surveyBounds} as upper and lover bounds)
 #'@param nYrs Numeric scalar. Number of years from the end of the time series for which reasonableness is checked.
-#' (Default = NULL, entire time series is used)
+#' (Default = NULL, contemporary period from startYr is used)
 #'@param surveyBounds Numeric vector. Size of 1x2 containing the values in which to multiple lower and upper bounds of observed data.
 #'For example (Default = c(1,1)) indicating use of min and max of observed biomass
 #'@param initBioBounds Numeric vector. Size of 1x2 containing lower and upper bound proportions used to scale initial biomass.
@@ -75,11 +77,22 @@
 diag_reasonability <- function(fgs,
                                biomind,
                                initialYr=1964,
+                               startYr = 1998,
                                speciesCodes=NULL,
                                realBiomass,
+                               useVariance=F,
                                nYrs = NULL,
                                surveyBounds = c(1,1),
                                initBioBounds = c(0.5,10)){
+
+  # Check realBiomass for variance values
+  if (useVariance == T) {
+    if (!(any(realBiomass %>% dplyr::distinct(variable) == "var"))) {
+      stop(" To use variance estimates in reasonability bounds the values of
+           variance need to be included in the realBiomass argument")
+    }
+
+  }
 
   ################################################
   ########### model output #######################
@@ -120,6 +133,7 @@ diag_reasonability <- function(fgs,
 
   # filter real biomass data to select only species that are fished in the atlantis model
   # then remove sharks, whales, birds etc if present.
+
   speciesBiomass <- realBiomass %>%
     dplyr::filter(.data$isFishedSpecies == T) %>%
     dplyr::filter(!grepl("shark",.data$Species)) %>%
@@ -129,22 +143,20 @@ diag_reasonability <- function(fgs,
     dplyr::select(.data$YEAR,.data$variable,.data$value,.data$Code,.data$Species) %>%
     dplyr::rename(year=.data$YEAR,code=.data$Code)
 
-  ## some codes have multiple species associated
-  # aggregate biomass over all species within a code
-  # metric tonnes
-  speciesBiomass <- speciesBiomass %>%
+  #reorder observed data and make wide format
+  observedData <- speciesBiomass %>%
     dplyr::group_by(.data$year,.data$variable,.data$code) %>%
-    dplyr::summarise(realBiomass = sum(.data$value),nSpecies = dplyr::n(),.groups="drop") %>%
-    tidyr::pivot_wider(.,names_from = .data$variable,values_from = .data$realBiomass)
+    tidyr::pivot_wider(.,names_from = .data$variable,values_from = .data$value)
+
 
   # find final year of model run
   maxRuntime <- max(modelBiomass$year)
 
   # determine time frame in which to perform "test"
   if (is.null(nYrs)) { # use all time series
-    filterTime <- initialYr
+    filterTime <- startYr #initialYr
   } else { # last n years
-    filterTime <- maxRuntime - nYrs
+    filterTime <- max(startYr,maxRuntime - nYrs + 1)
   }
 
   # now find if model biomass falls within real biomass * bounds
@@ -155,9 +167,9 @@ diag_reasonability <- function(fgs,
   for (acode in speciesCodes) {
 
     # filter real/observed data by species and the time frame
-    rb <- speciesBiomass %>%
+    rb <- observedData %>%
       dplyr::filter(.data$code == acode) %>%
-      dplyr::filter(.data$year > filterTime)
+      dplyr::filter(.data$year >= filterTime)
 
 
     # if data available for species code then get model data for time range
@@ -168,7 +180,7 @@ diag_reasonability <- function(fgs,
       # calculate goodness of fit (mef)
       mb <- modelBiomass %>%
         dplyr::filter(.data$code == acode) %>%
-        dplyr::filter(.data$year > filterTime) %>%
+        dplyr::filter(.data$year >= filterTime) %>%
         dplyr::mutate(reasonable = (.data$modelBiomass < .data$initialBiomass*initBioBounds[2]) &
                         (.data$modelBiomass >= .data$initialBiomass*initBioBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(.data$modelBiomass,.data$initialBiomass)$mef) %>%
@@ -185,23 +197,46 @@ diag_reasonability <- function(fgs,
 
     } else { # if complete data present
 
-      # compare model biomass against scaled survey estimates
-      # calculate goodness of fit (mef)
-      mb <- modelBiomass %>%
-        dplyr::filter(.data$code == acode) %>%
-        dplyr::filter(.data$year > filterTime) %>%
-        dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
-        dplyr::mutate(reasonable = (.data$modelBiomass < max(.data$tot.biomass,na.rm=T)*surveyBounds[2]) &
-                        (.data$modelBiomass > min(.data$tot.biomass,na.rm=T)*surveyBounds[1])) %>%
-        dplyr::mutate(modelSkill = calc_mef(.data$tot.biomass,.data$modelBiomass)$mef) %>%
-        dplyr::mutate(minBiomass = min(.data$modelBiomass)) %>%
-        dplyr::mutate(maxBiomass = max(.data$modelBiomass)) %>%
-        dplyr::mutate(propInitBio = .data$maxBiomass/.data$initialBiomass) %>%
-        dplyr::mutate(propAboveUpper = .data$maxBiomass/(max(.data$tot.biomass,na.rm=T)*surveyBounds[2]) - 1) %>%
-        dplyr::mutate(propBelowLower = -.data$minBiomass/(min(.data$tot.biomass,na.rm=T)*surveyBounds[1]) + 1) %>%
-        dplyr::group_by(.data$code) %>%
-        dplyr::mutate(maxExceedance = max(.data$propBelowLower,.data$propAboveUpper)) %>%
-        dplyr::ungroup()
+      if (!useVariance) { # use surveybounds argument to determine reasonability
+        # Upper bound is maximum observed biomass (over time series) * surveyBounds[2]
+        # compare model biomass against scaled survey estimates
+        # calculate goodness of fit (mef)
+        mb <- modelBiomass %>%
+          dplyr::filter(.data$code == acode) %>%
+          dplyr::filter(.data$year >= filterTime) %>%
+          dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
+          dplyr::mutate(reasonable = (.data$modelBiomass < max(.data$biomass,na.rm=T)*surveyBounds[2]) &
+                          (.data$modelBiomass > min(.data$biomass,na.rm=T)*surveyBounds[1])) %>%
+          dplyr::mutate(modelSkill = calc_mef(.data$biomass,.data$modelBiomass)$mef) %>%
+          dplyr::mutate(minBiomass = min(.data$modelBiomass)) %>%
+          dplyr::mutate(maxBiomass = max(.data$modelBiomass)) %>%
+          dplyr::mutate(propInitBio = .data$maxBiomass/.data$initialBiomass) %>%
+          dplyr::mutate(propAboveUpper = .data$maxBiomass/(max(.data$biomass,na.rm=T)*surveyBounds[2]) - 1) %>%
+          dplyr::mutate(propBelowLower = -.data$minBiomass/(min(.data$biomass,na.rm=T)*surveyBounds[1]) + 1) %>%
+          dplyr::group_by(.data$code) %>%
+          dplyr::mutate(maxExceedance = max(.data$propBelowLower,.data$propAboveUpper)) %>%
+          dplyr::ungroup()
+      } else { # bounds based on variance of estimate of biomass
+        # Upper bound is maximum (observed biomass * 3*max sd observed) over time series
+        mb <- modelBiomass %>%
+          dplyr::filter(.data$code == acode) %>%
+          dplyr::filter(.data$year >= filterTime) %>%
+          dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
+          dplyr::mutate(upperBound = .data$biomass + 3* sqrt(.data$var)) %>%
+          dplyr::mutate(lowerBound = .data$biomass - 3* sqrt(.data$var)) %>%
+          dplyr::mutate(reasonable = (.data$modelBiomass < max(.data$upperBound,na.rm=T)) &
+                          (.data$modelBiomass > max(0,.data$lowerBound,na.rm=T))) %>%
+          dplyr::mutate(modelSkill = calc_mef(.data$biomass,.data$modelBiomass)$mef) %>%
+          dplyr::mutate(minBiomass = min(.data$modelBiomass)) %>%
+          dplyr::mutate(maxBiomass = max(.data$modelBiomass)) %>%
+          dplyr::mutate(propInitBio = .data$maxBiomass/.data$initialBiomass) %>%
+          dplyr::mutate(propAboveUpper = .data$maxBiomass/(max(.data$upperBound,na.rm=T)) - 1) %>%
+          dplyr::mutate(propBelowLower = -.data$minBiomass/(max(0,.data$lowerBound,na.rm=T)) + 1) %>%
+          dplyr::group_by(.data$code) %>%
+          dplyr::mutate(maxExceedance = max(.data$propBelowLower,.data$propAboveUpper)) %>%
+          dplyr::ungroup()
+
+      }
 
       test <- "data"
     }
