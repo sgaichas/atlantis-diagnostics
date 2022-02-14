@@ -56,8 +56,10 @@ bounds it is flagged. The term "reasonable" is based on survey data when availab
   <span class="va">fgs</span>,
   <span class="va">biomind</span>,
   initialYr <span class="op">=</span> <span class="fl">1964</span>,
+  startYr <span class="op">=</span> <span class="fl">1998</span>,
   speciesCodes <span class="op">=</span> <span class="cn">NULL</span>,
   <span class="va">realBiomass</span>,
+  useVariance <span class="op">=</span> <span class="cn">F</span>,
   nYrs <span class="op">=</span> <span class="cn">NULL</span>,
   surveyBounds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,
   initBioBounds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">10</span><span class="op">)</span>
@@ -72,16 +74,20 @@ bounds it is flagged. The term "reasonable" is based on survey data when availab
 <dd><p>A character string. Path to the BiomIndx.txt file.</p></dd>
 <dt>initialYr</dt>
 <dd><p>Numeric Scalar. Year in which the model run was initiated. (Default = 1964)</p></dd>
+<dt>startYr</dt>
+<dd><p>Numeric Scalar. Year in which the model finishes spin up period. (Default = 1998)</p></dd>
 <dt>speciesCodes</dt>
 <dd><p>Character vector. A vector of Atlantis species codes in which to test for reasonableness
 (Default = NULL, uses all species found in  <code>modelBiomass</code>. Species codes should be a subset of the Atlantis species codes</p></dd>
 <dt>realBiomass</dt>
 <dd><p>A data frame. biomass time series (from assessments, stock SMART or otherwise) for species.
-CURRENTLY IMPLEMENTED USING SURVDAT DATA ONLY  <code>realBiomass</code> should be in long format with column labels (YEAR,variable,value,Code,Species,isFishedSpecies)
-Biomass units should be in metric tonnes</p></dd>
+<code>realBiomass</code> should be in long format with column labels (YEAR,variable,value,Code,Species,isFishedSpecies)
+variable should contain value = "biomass" (Biomass units should be in metric tonnes) and/or "var" if <code>useVariance = T</code></p></dd>
+<dt>useVariance</dt>
+<dd><p>Boolean. If to use variance estimates of biomass (included in <code>realBiomass</code>) (Default = F, reverts to using <code>surveyBounds</code> as upper and lover bounds)</p></dd>
 <dt>nYrs</dt>
 <dd><p>Numeric scalar. Number of years from the end of the time series for which reasonableness is checked.
-(Default = NULL, entire time series is used)</p></dd>
+(Default = NULL, contemporary period from startYr is used)</p></dd>
 <dt>surveyBounds</dt>
 <dd><p>Numeric vector. Size of 1x2 containing the values in which to multiple lower and upper bounds of observed data.
 For example (Default = c(1,1)) indicating use of min and max of observed biomass</p></dd>
