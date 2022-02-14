@@ -91,6 +91,7 @@ diag_reasonability <- function(fgs,
       stop(" To use variance estimates in reasonability bounds the values of
            variance need to be included in the realBiomass argument")
     }
+
   }
 
   ################################################
@@ -145,10 +146,8 @@ diag_reasonability <- function(fgs,
   #reorder observed data and make wide format
   observedData <- speciesBiomass %>%
     dplyr::group_by(.data$year,.data$variable,.data$code) %>%
-    # dplyr::summarise(value = sum(.data$value),
-    #                  nSpecies = dplyr::n(),
-    #                  .groups="drop") %>%
     tidyr::pivot_wider(.,names_from = .data$variable,values_from = .data$value)
+
 
   # find final year of model run
   maxRuntime <- max(modelBiomass$year)
@@ -181,7 +180,7 @@ diag_reasonability <- function(fgs,
       # calculate goodness of fit (mef)
       mb <- modelBiomass %>%
         dplyr::filter(.data$code == acode) %>%
-        dplyr::filter(.data$year > filterTime) %>%
+        dplyr::filter(.data$year >= filterTime) %>%
         dplyr::mutate(reasonable = (.data$modelBiomass < .data$initialBiomass*initBioBounds[2]) &
                         (.data$modelBiomass >= .data$initialBiomass*initBioBounds[1])) %>%
         dplyr::mutate(modelSkill = calc_mef(.data$modelBiomass,.data$initialBiomass)$mef) %>%
@@ -198,39 +197,41 @@ diag_reasonability <- function(fgs,
 
     } else { # if complete data present
 
-      if (is.null(realVariance)) { # use surveybounds argument to determine reasonability
+      if (!useVariance) { # use surveybounds argument to determine reasonability
         # Upper bound is maximum observed biomass (over time series) * surveyBounds[2]
         # compare model biomass against scaled survey estimates
         # calculate goodness of fit (mef)
         mb <- modelBiomass %>%
           dplyr::filter(.data$code == acode) %>%
-          dplyr::filter(.data$year > filterTime) %>%
+          dplyr::filter(.data$year >= filterTime) %>%
           dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
-          dplyr::mutate(reasonable = (.data$modelBiomass < max(.data$tot.biomass,na.rm=T)*surveyBounds[2]) &
-                          (.data$modelBiomass > min(.data$tot.biomass,na.rm=T)*surveyBounds[1])) %>%
-          dplyr::mutate(modelSkill = calc_mef(.data$tot.biomass,.data$modelBiomass)$mef) %>%
+          dplyr::mutate(reasonable = (.data$modelBiomass < max(.data$biomass,na.rm=T)*surveyBounds[2]) &
+                          (.data$modelBiomass > min(.data$biomass,na.rm=T)*surveyBounds[1])) %>%
+          dplyr::mutate(modelSkill = calc_mef(.data$biomass,.data$modelBiomass)$mef) %>%
           dplyr::mutate(minBiomass = min(.data$modelBiomass)) %>%
           dplyr::mutate(maxBiomass = max(.data$modelBiomass)) %>%
           dplyr::mutate(propInitBio = .data$maxBiomass/.data$initialBiomass) %>%
-          dplyr::mutate(propAboveUpper = .data$maxBiomass/(max(.data$tot.biomass,na.rm=T)*surveyBounds[2]) - 1) %>%
-          dplyr::mutate(propBelowLower = -.data$minBiomass/(min(.data$tot.biomass,na.rm=T)*surveyBounds[1]) + 1) %>%
+          dplyr::mutate(propAboveUpper = .data$maxBiomass/(max(.data$biomass,na.rm=T)*surveyBounds[2]) - 1) %>%
+          dplyr::mutate(propBelowLower = -.data$minBiomass/(min(.data$biomass,na.rm=T)*surveyBounds[1]) + 1) %>%
           dplyr::group_by(.data$code) %>%
           dplyr::mutate(maxExceedance = max(.data$propBelowLower,.data$propAboveUpper)) %>%
           dplyr::ungroup()
       } else { # bounds based on variance of estimate of biomass
-        # Upper bound is maximum observed biomass (over time series) * 3*max sd observed
+        # Upper bound is maximum (observed biomass * 3*max sd observed) over time series
         mb <- modelBiomass %>%
           dplyr::filter(.data$code == acode) %>%
-          dplyr::filter(.data$year > filterTime) %>%
+          dplyr::filter(.data$year >= filterTime) %>%
           dplyr::left_join(.,rb,by=c("code"="code","year"="year")) %>%
-          dplyr::mutate(reasonable = (.data$modelBiomass < max(.data$tot.biomass,na.rm=T)*surveyBounds[2]) &
-                          (.data$modelBiomass > min(.data$tot.biomass,na.rm=T)*surveyBounds[1])) %>%
-          dplyr::mutate(modelSkill = calc_mef(.data$tot.biomass,.data$modelBiomass)$mef) %>%
+          dplyr::mutate(upperBound = .data$biomass + 3* sqrt(.data$var)) %>%
+          dplyr::mutate(lowerBound = .data$biomass - 3* sqrt(.data$var)) %>%
+          dplyr::mutate(reasonable = (.data$modelBiomass < max(.data$upperBound,na.rm=T)) &
+                          (.data$modelBiomass > max(0,.data$lowerBound,na.rm=T))) %>%
+          dplyr::mutate(modelSkill = calc_mef(.data$biomass,.data$modelBiomass)$mef) %>%
           dplyr::mutate(minBiomass = min(.data$modelBiomass)) %>%
           dplyr::mutate(maxBiomass = max(.data$modelBiomass)) %>%
           dplyr::mutate(propInitBio = .data$maxBiomass/.data$initialBiomass) %>%
-          dplyr::mutate(propAboveUpper = .data$maxBiomass/(max(.data$tot.biomass,na.rm=T)*surveyBounds[2]) - 1) %>%
-          dplyr::mutate(propBelowLower = -.data$minBiomass/(min(.data$tot.biomass,na.rm=T)*surveyBounds[1]) + 1) %>%
+          dplyr::mutate(propAboveUpper = .data$maxBiomass/(max(.data$upperBound,na.rm=T)) - 1) %>%
+          dplyr::mutate(propBelowLower = -.data$minBiomass/(max(0,.data$lowerBound,na.rm=T)) + 1) %>%
           dplyr::group_by(.data$code) %>%
           dplyr::mutate(maxExceedance = max(.data$propBelowLower,.data$propAboveUpper)) %>%
           dplyr::ungroup()

@@ -8,6 +8,7 @@ diag_reasonability(
   fgs,
   biomind,
   initialYr = 1964,
+  startYr = 1998,
   speciesCodes = NULL,
   realBiomass,
   useVariance = F,
@@ -23,6 +24,8 @@ diag_reasonability(
 
 \item{initialYr}{Numeric Scalar. Year in which the model run was initiated. (Default = 1964)}
 
+\item{startYr}{Numeric Scalar. Year in which the model finishes spin up period. (Default = 1998)}
+
 \item{speciesCodes}{Character vector. A vector of Atlantis species codes in which to test for reasonableness
 (Default = NULL, uses all species found in  \code{modelBiomass}. Species codes should be a subset of the Atlantis species codes}
 
@@ -33,7 +36,7 @@ variable should contain value = "biomass" (Biomass units should be in metric ton
 \item{useVariance}{Boolean. If to use variance estimates of biomass (included in \code{realBiomass}) (Default = F, reverts to using \code{surveyBounds} as upper and lover bounds)}
 
 \item{nYrs}{Numeric scalar. Number of years from the end of the time series for which reasonableness is checked.
-(Default = NULL, entire time series is used)}
+(Default = NULL, contemporary period from startYr is used)}
 
 \item{surveyBounds}{Numeric vector. Size of 1x2 containing the values in which to multiple lower and upper bounds of observed data.
 For example (Default = c(1,1)) indicating use of min and max of observed biomass}
