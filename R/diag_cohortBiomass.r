@@ -50,8 +50,7 @@ diag_cohortBiomass <- function(fgs,
   mort <- utils::read.csv(mortality,sep = " ", stringsAsFactors=FALSE, header=TRUE)
   mort <- dplyr::select(mort,dplyr::contains(".F"))
   mort_l20 <- dplyr::slice(mort,-c(1:34,55))
-  meanMort <- dplyr::summarize_all(mort_l20,mean)
-
+  meanMort <- colMeans(mort_l20) %>% t() %>% as.data.frame()
 
   neusPriority <- utils::read.csv(neusPriority,sep=",",stringsAsFactors=FALSE,header=TRUE) %>%
     dplyr::rename(priority = .data$priority.overall) %>%
