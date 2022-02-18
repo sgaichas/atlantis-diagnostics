@@ -40,6 +40,8 @@ diag_cohortBiomass <- function(fgs,
     speciesCodes <- allCodes
   }
 
+  #pull all species with >= 2 groups that are FISH
+  ageCodes <- atlantistools::get_age_acronyms(fgs)
 
   cohortBiom <- utils::read.csv(agebiomind,sep = " ", stringsAsFactors=FALSE, header=TRUE)
   mort <- utils::read.csv(mortality,sep = " ", stringsAsFactors=FALSE, header=TRUE)
@@ -110,6 +112,7 @@ diag_cohortBiomass <- function(fgs,
 
   diagnostics <- diagnostics %>%
     dplyr::arrange(.data$priority,.data$pass,.data$maxCohort,.data$stability,.data$fishing,.data$code) %>%
+    dplyr::filter(.data$code %in% ageCodes) %>%
     tibble::as_tibble()
 
   return(diagnostics)
