@@ -59,7 +59,8 @@ the smallest or largest age class</p>
   <span class="va">mortality</span>,
   <span class="va">agebiomind</span>,
   speciesCodes <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">neusPriority</span>
+  <span class="va">neusPriority</span>,
+  fishedSpecies <span class="op">=</span> <span class="fl">2</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -76,6 +77,9 @@ the smallest or largest age class</p>
 (Default = NULL, uses all species with <code>IsTurnedOn=1</code> in <code>fgs</code> file)</p></dd>
 <dt>neusPriority</dt>
 <dd><p>A character string. Path to location of Species Priorities file.</p></dd>
+<dt>fishedSpecies</dt>
+<dd><p>Numeric scalar. Filter by how much species are fished. Values = 1 (most), 2, 3, 4 (least)
+(Default = 2. Only species fished at level &lt;= 2 will be returned)</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
