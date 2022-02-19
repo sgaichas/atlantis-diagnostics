@@ -10,6 +10,8 @@
 #'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for persistence.
 #'(Default = NULL, uses all species with \code{IsTurnedOn=1} in \code{fgs} file)
 #'@param neusPriority A character string. Path to location of Species Priorities file.
+#'@param fishedSpecies Numeric scalar. Filter by how much species are fished. Values = 1 (most), 2, 3, 4 (least)
+#' (Default = 2. Only species fished at level <= 2 will be returned)
 #'
 #'@return
 #'\item{code}{Atlantis species code}
@@ -25,7 +27,8 @@ diag_cohortBiomass <- function(fgs,
                                mortality,
                                agebiomind,
                                speciesCodes = NULL,
-                               neusPriority) {
+                               neusPriority,
+                               fishedSpecies = 2) {
 
 
   # get species codes
@@ -40,13 +43,14 @@ diag_cohortBiomass <- function(fgs,
     speciesCodes <- allCodes
   }
 
+  #pull all species with >= 2 groups that are FISH
+  ageCodes <- atlantistools::get_age_acronyms(fgs)
 
   cohortBiom <- utils::read.csv(agebiomind,sep = " ", stringsAsFactors=FALSE, header=TRUE)
   mort <- utils::read.csv(mortality,sep = " ", stringsAsFactors=FALSE, header=TRUE)
   mort <- dplyr::select(mort,dplyr::contains(".F"))
   mort_l20 <- dplyr::slice(mort,-c(1:34,55))
-  meanMort <- dplyr::summarize_all(mort_l20,mean)
-
+  meanMort <- colMeans(mort_l20) %>% t() %>% as.data.frame()
 
   neusPriority <- utils::read.csv(neusPriority,sep=",",stringsAsFactors=FALSE,header=TRUE) %>%
     dplyr::rename(priority = .data$priority.overall) %>%
@@ -67,7 +71,8 @@ diag_cohortBiomass <- function(fgs,
   for (i in 1:numGroups) {
     groupName <- speciesCodes[i]
     groupCohort <- dplyr::select(cohortBiom,contains(groupName))
-    groupCohortMean <- dplyr::summarise_each(groupCohort, mean)
+    groupCohortMean <- colMeans(groupCohort)
+
     maxCohortMean <- base::which.max(groupCohortMean)
     maxCohort <- c(maxCohort, maxCohortMean)
     if (maxCohortMean == 1 || maxCohortMean == 10) {
@@ -109,7 +114,9 @@ diag_cohortBiomass <- function(fgs,
   }
 
   diagnostics <- diagnostics %>%
-    dplyr::arrange(.data$priority,.data$pass,.data$maxCohort,.data$stability,.data$fishing,.data$code) %>%
+    dplyr::filter(.data$code %in% ageCodes) %>%
+    dplyr::filter(.data$fishing <= fishedSpecies) %>%
+    dplyr::arrange(.data$pass,.data$priority,.data$fishing,.data$maxCohort,.data$stability,.data$code) %>%
     tibble::as_tibble()
 
   return(diagnostics)
