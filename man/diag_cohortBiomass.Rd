@@ -9,7 +9,8 @@ diag_cohortBiomass(
   mortality,
   agebiomind,
   speciesCodes = NULL,
-  neusPriority
+  neusPriority,
+  fishedSpecies = 2
 )
 }
 \arguments{
@@ -23,6 +24,9 @@ diag_cohortBiomass(
 (Default = NULL, uses all species with \code{IsTurnedOn=1} in \code{fgs} file)}
 
 \item{neusPriority}{A character string. Path to location of Species Priorities file.}
+
+\item{fishedSpecies}{Numeric scalar. Filter by how much species are fished. Values = 1 (most), 2, 3, 4 (least)
+(Default = 2. Only species fished at level <= 2 will be returned)}
 }
 \value{
 \item{code}{Atlantis species code}
