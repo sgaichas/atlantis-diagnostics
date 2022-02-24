@@ -146,6 +146,7 @@ diag_reasonability <- function(fgs,
   #reorder observed data and make wide format
   observedData <- speciesBiomass %>%
     dplyr::group_by(.data$year,.data$variable,.data$code) %>%
+    dplyr::summarise(value = sum(value),.groups = "drop") %>% # aggregate over species with same functional group
     tidyr::pivot_wider(.,names_from = .data$variable,values_from = .data$value)
 
 
