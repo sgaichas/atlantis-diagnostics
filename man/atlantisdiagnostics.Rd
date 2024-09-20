@@ -2,6 +2,7 @@
 % Please edit documentation in R/atlantisdiagnostics.r
 \docType{package}
 \name{atlantisdiagnostics}
+\alias{atlantisdiagnostics-package}
 \alias{atlantisdiagnostics}
 \title{atlantisdiagnostics: Tools for calibrating Atlantis ecosystem models}
 \description{
@@ -23,3 +24,23 @@ Tools to aid in diagnosing issues in a parameterized Atlantis Ecosystem model
 To learn more about using \code{atlantisdiagnostics}, start with the vignette: \code{browseVignettes(package="atlantisdiagnostics")} or click the index below
 }
 
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/NOAA-EDAB/atlantisdiagnostics}
+  \item Report bugs at \url{https://github.com/NOAA-EDAB/atlantisdiagnostics/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Andy Beet \email{andrew.beet@noaa.gov} (\href{https://orcid.org/0000-0001-8270-7090}{ORCID})
+
+Authors:
+\itemize{
+  \item Sarah Gaichas \email{Sarah.Gaichas@noaa.gov}
+  \item Joeseph Caracappa \email{joseph.caracappa@noaa.gov}
+  \item Robert Gamble \email{Robert.Gamble@noaa.gov}
+  \item Scott Large \email{Scott.Large.gov}
+}
+
+}
