@@ -6,6 +6,7 @@
 #'
 #'@param fgs A character string. Path to location of functional groups file.
 #'@param fishery.prm A character string. Path to the fishery definitions file.
+#'@param catch.file A character string. Path to catch nc file
 #'@param bgm A character string. Path to the bgm file.
 #'@param catch.ref A data.frame containing reference catch by fleet data (species|fleet|polygon|ref.value)
 #'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for stability.

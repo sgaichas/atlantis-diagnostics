@@ -75,6 +75,7 @@ diag_stability(fgs,biomind, speciesCodes=c("HER","WHK"), nYrs = 10, relChangeThr
 \seealso{
 Other diags: 
 \code{\link{diag_fleet_catch}()},
+\code{\link{diag_persistence}()},
 \code{\link{diag_reasonability}()}
 }
 \concept{diags}

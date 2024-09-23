@@ -67,3 +67,10 @@ diag_persistence(fgs,biomind, speciesCodes="HER", nYrs = 10, floor = 0.1)
 
 }
 }
+\seealso{
+Other diags: 
+\code{\link{diag_fleet_catch}()},
+\code{\link{diag_reasonability}()},
+\code{\link{diag_stability}()}
+}
+\concept{diags}

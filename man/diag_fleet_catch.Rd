@@ -21,6 +21,8 @@ diag_fleet_catch(
 
 \item{fishery.prm}{A character string. Path to the fishery definitions file.}
 
+\item{catch.file}{A character string. Path to catch nc file}
+
 \item{bgm}{A character string. Path to the bgm file.}
 
 \item{catch.ref}{A data.frame containing reference catch by fleet data (species|fleet|polygon|ref.value)}
@@ -53,6 +55,7 @@ over the last n years of a run.
 }
 \seealso{
 Other diags: 
+\code{\link{diag_persistence}()},
 \code{\link{diag_reasonability}()},
 \code{\link{diag_stability}()}
 }
