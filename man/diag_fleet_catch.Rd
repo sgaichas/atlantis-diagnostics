@@ -5,10 +5,10 @@
 \title{Test fleet catch}
 \usage{
 diag_fleet_catch(
-  fgs.file,
+  fgs,
   fishery.file,
   catch.file,
-  bgm.file,
+  bgm,
   catch.ref,
   speciesCodes = NULL,
   nYrs = 20,
@@ -17,11 +17,11 @@ diag_fleet_catch(
 )
 }
 \arguments{
-\item{fgs.file}{A character string. Path to location of functional groups file.}
+\item{fgs}{A character string. Path to location of functional groups file.}
 
 \item{fishery.file}{A character string. Path to the fishery definitions file.}
 
-\item{bgm.file}{A character string. Path to the bgm file.}
+\item{bgm}{A character string. Path to the bgm file.}
 
 \item{catch.ref}{A data.frame containing reference catch by fleet data (species|fleet|polygon|ref.value)}
 
