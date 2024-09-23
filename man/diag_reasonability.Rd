@@ -96,6 +96,7 @@ diag_reasonability(fgs, biomind, initialYr = 1964, speciesCodes =c("MAK","WHK"),
 }
 \seealso{
 Other diags: 
+\code{\link{diag_fleet_catch}()},
 \code{\link{diag_stability}()}
 }
 \concept{diags}

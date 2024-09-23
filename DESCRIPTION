@@ -47,5 +47,6 @@ Imports:
     tibble
 Remotes:
     Atlantis-Ecosystem-Model/atlantistools
+    NOAA-EDAB/atlantisprocessing
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.1
