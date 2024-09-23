@@ -16,7 +16,4 @@
 #'
 #'To learn more about using \code{atlantisdiagnostics}, start with the vignette: \code{browseVignettes(package="atlantisdiagnostics")} or click the index below
 #'
-#'
-#' @docType package
-#' @name atlantisdiagnostics
-NULL
+"_PACKAGE"
