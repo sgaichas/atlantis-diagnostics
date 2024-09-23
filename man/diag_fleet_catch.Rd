@@ -6,7 +6,7 @@
 \usage{
 diag_fleet_catch(
   fgs,
-  fishery.file,
+  fishery.prm,
   catch.file,
   bgm,
   catch.ref,
@@ -19,7 +19,7 @@ diag_fleet_catch(
 \arguments{
 \item{fgs}{A character string. Path to location of functional groups file.}
 
-\item{fishery.file}{A character string. Path to the fishery definitions file.}
+\item{fishery.prm}{A character string. Path to the fishery definitions file.}
 
 \item{bgm}{A character string. Path to the bgm file.}
 

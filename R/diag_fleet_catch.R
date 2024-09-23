@@ -5,7 +5,7 @@
 #'
 #'
 #'@param fgs A character string. Path to location of functional groups file.
-#'@param fishery.file A character string. Path to the fishery definitions file.
+#'@param fishery.prm A character string. Path to the fishery definitions file.
 #'@param bgm A character string. Path to the bgm file.
 #'@param catch.ref A data.frame containing reference catch by fleet data (species|fleet|polygon|ref.value)
 #'@param speciesCodes Character vector. A vector of Atlantis species codes in which to test for stability.
@@ -33,7 +33,7 @@
 #'@importFrom magrittr %>%
 
 diag_fleet_catch <- function(fgs,
-                             fishery.file,
+                             fishery.prm,
                              catch.file,
                              bgm,
                              catch.ref,
@@ -45,14 +45,14 @@ diag_fleet_catch <- function(fgs,
   boxes = atlantistools::convert_bgm(bgm)%>%
     dplyr::distinct(polygon,inside_lat,inside_long)
 
-  catch.fleet =atlantisprocessing::process_catch_fleet(fishery.prm = fishery.file,
+  catch.fleet =atlantisprocessing::process_catch_fleet(fishery.prm = fishery.prm,
                                           catch = catch.file,
-                                          groups.file = fgs.file)
+                                          groups.file = fgs)
 
   if(!is.null(speciesCodes)){
-    fgs.df = read.csv(fgs.file,as.is =T)
+    fgs.df = read.csv(fgs,as.is =T)
 
-    spp.match  = fgs$LongName[which(fgs$Code %in% speciesCodes)]
+    spp.match  = fgs.df$LongName[which(fgs.df$Code %in% speciesCodes)]
 
     catch.fleet = catch.fleet %>%
       dplyr::filter(species %in% spp.match)
