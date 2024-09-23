@@ -22,7 +22,7 @@ Authors@R:
     person(given = "Scott",
            family = "Large",
            role = c("aut"),
-           email = "Scott.Large.gov"))
+           email = "Scott.Large@noaa.gov"))
 Description: Atlantis diagnostics functions in this package are used to determine whether the model 
     is meeting defined performance and review criteria, including persistence of all functional groups,
     biomass stability for the last ~20 years of a run, species groups 
@@ -43,6 +43,7 @@ Imports:
     purrr,
     tidyr,
     atlantistools,
+    atlantisprocessing,
     rlang,
     tibble
 Remotes:
